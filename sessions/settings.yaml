@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json
+settings:
+  activitylog:
+    path: "~/.cumulocity/activityLog"
+  session:
+    defaultUsername: ''
+  defaults: {}
+  template:
+    path: "~/.cumulocity/templates"
+  views:
+    custompaths:
+    - "~/.cumulocity/views/default"
+    columnMinWidth: 5
+    columnMaxWidth: 80
+    columnPadding: 5
+  commonAliases:
+    recentAlarms: alarms list --dateFrom -1h
+    mo: inventory get --view none --output json --id '$1'
