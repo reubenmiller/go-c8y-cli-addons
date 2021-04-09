@@ -1,10 +1,17 @@
 #!/bin/bash
 
-# This script installs go-c8y-cli on your Linux or macOS computer.
+# This script installs go-c8y-cli on your Linux, macOS or Windows computer.
 # It should be run as root, and can be run directly from a GitHub
 # release, for example as:
 #
 #   curl https://github.com/reubenmiller/go-c8y-cli/releases/download/v2.0.0/install.sh | sudo bash
+#
+# From github
+#   git clone https://github.com/reubenmiller/go-c8y-cli-addons.git ~/.go-c8y-cli
+#   ~/.go-c8y-cli/shell/install.sh
+#
+#   # Or force downloading of the binary for another OS and architecture
+#   sudo PLATFORM_TUPLE=windows-amd64 ~/.go-c8y-cli/shell/install.sh
 #
 # All downloads occur over HTTPS from the Github releases page.
 
@@ -30,7 +37,7 @@ OS=
 ARCH=
 WORK_DIR=
 
-PLATFORM_TUPLE=
+PLATFORM_TUPLE=${PLATFORM_TUPLE:-}
 
 error() {
   if [ $# != 0 ]; then
@@ -48,26 +55,13 @@ fail() {
   exit 1
 }
 
-assert_linux_or_macos() {
-  OS=`uname`
-  ARCH=`uname -m`
-  if [ "$OS" != Linux -a "$OS" != Darwin ]; then
-    fail "E_UNSUPPORTED_OS" "dolt install.sh only supports macOS and Linux."
+detect_platform() {
+  if [[ "$PLATFORM_TUPLE" != "" ]]; then
+    return
   fi
-  if [ "$ARCH" != x86_64 -a "$ARCH" != i386 -a "$ARCH" != i686 ]; then
-    fail "E_UNSUPPOSED_ARCH" "dolt install.sh only supports installing dolt on x86_64 or x86."
-  fi
-
-  if [ "$OS" == Linux ]; then
-    PLATFORM_TUPLE=linux
-  else
-    PLATFORM_TUPLE=darwin
-  fi
-  if [ "$ARCH" == x86_64 ]; then
-    PLATFORM_TUPLE=$PLATFORM_TUPLE-amd64
-  else
-    PLATFORM_TUPLE=$PLATFORM_TUPLE-386
-  fi
+  OS=$( get_os )
+  ARCH=$( get_architecture )
+  PLATFORM_TUPLE=$OS-$ARCH
 }
 
 assert_dependencies() {
@@ -88,31 +82,47 @@ assert_uid_zero() {
   fi
 }
 
-create_workdir() {
-  WORK_DIR=`mktemp -d -t dolt-installer.XXXXXX`
-  cleanup() {
-    rm -rf "$WORK_DIR"
-  }
-  trap cleanup EXIT
-  cd "$WORK_DIR"
-}
-
-install_binary_release() {
-  local FILE=dolt-$PLATFORM_TUPLE.tar.gz
-  local URL=$RELEASES_BASE_URL/$FILE
-  echo "Downloading:" $URL
-  curl -A "$CURL_USER_AGENT" -fsL "$URL" > "$FILE"
-  tar zxf "$FILE"
-  echo "Installing go-c8y-cli to /usr/local/bin."
-  [ -d /usr/local/bin ] || install -o 0 -g 0 -d /usr/local/bin
-  install -o 0 -g 0 dolt-$PLATFORM_TUPLE/bin/{c8y} /usr/local/bin
-}
-
-get-latest-tag () {
+get_latest_tag () {
     curl https://api.github.com/repos/$OWNER/$REPO/releases/latest -H "Accept: application/vnd.github.v3+json" --silent | grep tag_name | cut -d '"' -f 4
 }
 
-c8y-update () {
+get_architecture () {
+  if [[ $(command -v dpkg) ]]; then
+    dpkg --print-architecture
+  else
+    case "$( uname -i )" in
+      x86_64|amd64)
+        echo amd64;;
+      i?86)
+        echo i386;;
+      armv5|armv6|armv7)
+        echo "armel";;
+      arm*)
+        echo "arm64";;
+    esac
+  fi
+}
+
+get_os () {
+  local osname="linux"
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      osname=linux
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+      osname=macos
+  elif [[ "$OSTYPE" == "cygwin" ]]; then
+      osname=windows
+  elif [[ "$OSTYPE" == "msys" ]]; then
+      osname=windows
+  elif [[ "$OSTYPE" == "linux"* ]]; then
+      osname=linux
+  else
+      # assume windows
+      osname=windows
+  fi
+  echo $osname
+}
+
+install_c8y_binary () {
     bold="\e[1m"
     normal="\e[0m"
     red="\e[31m"
@@ -125,11 +135,13 @@ c8y-update () {
         mkdir -p "$INSTALL_PATH"
     fi
 
-    current_version=$(c8y version 2> /dev/null | tail -1)
-    
+    current_version=
+    if [[ $(command -v c8y) ]]; then
+      current_version=$(c8y version 2> /dev/null | tail -1)
+    fi
 
     if [[ "$VERSION" = "latest" ]]; then
-        VERSION=$( get-latest-tag )
+        VERSION=$( get_latest_tag )
     fi
 
     if [[ "$current_version" = "$VERSION" ]]; then
@@ -138,28 +150,31 @@ c8y-update () {
     fi
 
     # Get binary name based on os type
-    BINARY_NAME=c8y.linux
+    BINARY_SUFFIX=
 
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        BINARY_NAME=c8y.linux
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        BINARY_NAME=c8y.macos
-    elif [[ "$OSTYPE" == "cygwin" ]]; then
-        BINARY_NAME=c8y.windows.exe
-    elif [[ "$OSTYPE" == "msys" ]]; then
-        BINARY_NAME=c8y.windows.exe
-    elif [[ "$OSTYPE" == "linux"* ]]; then
-        BINARY_NAME=c8y.linux
-    else
-        # assume windows
-        BINARY_NAME=c8y.windows.exe
+    if [[ $PLATFORM_TUPLE == *"windows"* ]]; then
+        BINARY_SUFFIX=".exe"
     fi
 
+    BINARY_NAME="c8y.$PLATFORM_TUPLE$BINARY_SUFFIX"
+
     # try to download latest c8y version
-    echo -n "downloading ($BINARY_NAME)..."
+    if [[ "$current_version" == "" ]]; then
+      echo -n "downloading ($BINARY_NAME $VERSION)..."
+    else
+      echo -n "updating ($BINARY_NAME) from $current_version to $VERSION..."
+    fi
 
     c8ytmp=./.c8y.tmp
-    curl -A "$CURL_USER_AGENT" -fsL https://github.com/$OWNER/$REPO/releases/download/$VERSION/$BINARY_NAME -o $c8ytmp
+    BINARY_URL="https://github.com/$OWNER/$REPO/releases/download/$VERSION/$BINARY_NAME"
+    if curl -A "$CURL_USER_AGENT" -fsL $BINARY_URL -o $c8ytmp
+    then
+      echo -e "${green}OK${normal}"
+    else
+      echo -e "${red}ERROR\nURL: $BINARY_URL${normal}"
+      return
+    fi
+
     chmod +x $c8ytmp
 
     new_version=$($c8ytmp version 2>/dev/null | tail -1)
@@ -182,8 +197,8 @@ c8y-update () {
         export PATH=${PATH}:$INSTALL_PATH
     fi
 
-    if [ "$current_version" = "$new_version"]; then
-        echo -e "${green}c8y is already up to date: $(current_version)${normal}"
+    if [[ "$current_version" == "$new_version" ]]; then
+        echo -e "${green}c8y is already up to date: ${current_version}${normal}"
         return 0
     fi
 
@@ -195,12 +210,10 @@ install_addons () {
     git clone https://github.com/$OWNER/${ADDON_REPO}.git
 }
 
-assert_linux_or_macos
+detect_platform
 assert_dependencies
 assert_uid_zero
-create_workdir
-c8y-update
-# install_binary_release
+install_c8y_binary
 
 }
 
