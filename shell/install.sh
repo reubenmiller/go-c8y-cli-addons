@@ -73,6 +73,7 @@ assert_dependencies() {
   type -p grep > /dev/null || fail "E_GREP_MISSING" "Please install grep(1)."
   type -p cut > /dev/null || fail "E_CUT_MISSING" "Please install cut(1)."
   type -p git > /dev/null || fail "E_GIT_MISSING" "Please install git(1)."
+  type -p xargs > /dev/null || fail "E_XARGS_MISSING" "Please install xargs(1)."
 }
 
 assert_uid_zero() {
@@ -137,26 +138,27 @@ install_c8y_binary () {
 
     current_version=
     if [[ $(command -v c8y) ]]; then
-      current_version=$(c8y version 2> /dev/null | tail -1)
+      current_version=$( c8y version --select version --output csv 2> /dev/null || true | tail -1 )
+      if [[ "$current_version" == "" ]]; then
+        current_version=$( c8y version 2> /dev/null | tail -1 | cut -d'-' -f1 | xargs )
+      fi
     fi
 
-    if [[ "$VERSION" = "latest" ]]; then
+    if [[ "$VERSION" == "latest" ]]; then
         VERSION=$( get_latest_tag )
-    fi
-
-    if [[ "$current_version" = "$VERSION" ]]; then
-        echo "Already up to date"
-        return
     fi
 
     # Get binary name based on os type
     BINARY_SUFFIX=
-
     if [[ $PLATFORM_TUPLE == *"windows"* ]]; then
         BINARY_SUFFIX=".exe"
     fi
-
     BINARY_NAME="c8y.$PLATFORM_TUPLE$BINARY_SUFFIX"
+
+    if [[ "$current_version" == "$VERSION" ]]; then
+        echo -e "${green}$BINARY_NAME is already up to date: ${VERSION}${normal}"
+        return 0
+    fi
 
     # try to download latest c8y version
     if [[ "$current_version" == "" ]]; then
@@ -171,7 +173,7 @@ install_c8y_binary () {
     then
       echo -e "${green}OK${normal}"
     else
-      echo -e "${red}ERROR\nURL: $BINARY_URL${normal}"
+      echo -e "${red}FAILED\nURL: $BINARY_URL${normal}"
       return
     fi
 
@@ -188,7 +190,6 @@ install_c8y_binary () {
         rm -f .c8y.tmp
         return 1
     else
-        echo -e "${green}ok${normal}"
         mv $c8ytmp $INSTALL_PATH/c8y
     fi
 
@@ -197,12 +198,7 @@ install_c8y_binary () {
         export PATH=${PATH}:$INSTALL_PATH
     fi
 
-    if [[ "$current_version" == "$new_version" ]]; then
-        echo -e "${green}c8y is already up to date: ${current_version}${normal}"
-        return 0
-    fi
-
-    # show new version to user
+    # show new version
     c8y version
 }
 
