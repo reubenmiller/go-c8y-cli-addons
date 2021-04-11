@@ -10,7 +10,7 @@ fi
 
 if [ ! -f ~/.bash_completion.d/complete_alias ]; then
     echo "Installing bash completion for aliases"
-    curl https://raw.githubusercontent.com/cykerway/complete-alias/master/complete_alias \
+    curl -sfL https://raw.githubusercontent.com/cykerway/complete-alias/master/complete_alias \
             > ~/.bash_completion.d/complete_alias
 fi
 
