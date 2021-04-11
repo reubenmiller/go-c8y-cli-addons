@@ -1,3 +1,9 @@
 # sessions
 sessions/**
-!sessions/settings.*
+
+# temp folders
+c8y_*amd64
+c8y_*tar.gz
+
+# activity log
+c8y.activitylog.*
