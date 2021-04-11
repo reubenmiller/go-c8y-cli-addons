@@ -2,15 +2,16 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json
 settings:
   activitylog:
-    path: "~/.cumulocity/activityLog"
+    path: "$C8Y_HOME/activityLog"
+    enabled: true
   session:
     defaultUsername: ''
   defaults: {}
   template:
-    path: "~/.cumulocity/templates"
+    path: "$C8Y_HOME/templates"
   views:
     custompaths:
-    - "~/.cumulocity/views/default"
+    - "$C8Y_HOME/views/default"
     columnMinWidth: 5
     columnMaxWidth: 80
     columnPadding: 5
