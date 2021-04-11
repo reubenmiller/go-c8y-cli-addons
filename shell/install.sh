@@ -8,10 +8,10 @@
 #
 # From github
 #   git clone https://github.com/reubenmiller/go-c8y-cli-addons.git ~/.go-c8y-cli
-#   ~/.go-c8y-cli/shell/install.sh
+#   sudo -E ~/.go-c8y-cli/shell/install.sh
 #
 #   # Or force downloading of the binary for another OS and architecture
-#   sudo PLATFORM_TUPLE=windows-amd64 ~/.go-c8y-cli/shell/install.sh
+#   sudo -E PLATFORM_TUPLE=windows_amd64 ~/.go-c8y-cli/shell/install.sh
 #
 # All downloads occur over HTTPS from the Github releases page.
 
@@ -27,9 +27,13 @@ set -euo pipefail
 OWNER=reubenmiller
 REPO=go-c8y-cli
 ADDON_REPO=go-c8y-cli-addons
-GO_C8Y_CLI_VERSION=0.25.1
-RELEASES_BASE_URL=https://github.com/$OWNER/$REPO/releases/download/v"$GO_C8Y_CLI_VERSION"
-INSTALL_URL=$RELEASES_BASE_URL/install.sh
+GO_C8Y_CLI_VERSION=latest
+CURL_AUTH_HEADER=
+GITHUB_TOKEN=${GITHUB_TOKEN:-}
+
+if [[ "$GITHUB_TOKEN" != "" ]]; then
+  CURL_AUTH_HEADER="Authorization: Bearer $GITHUB_TOKEN"
+fi
 
 CURL_USER_AGENT=${CURL_USER_AGENT:-go-c8y-cli-installer}
 
@@ -61,7 +65,7 @@ detect_platform() {
   fi
   OS=$( get_os )
   ARCH=$( get_architecture )
-  PLATFORM_TUPLE=$OS-$ARCH
+  PLATFORM_TUPLE="${OS}_${ARCH}"
 }
 
 assert_dependencies() {
@@ -79,12 +83,19 @@ assert_dependencies() {
 assert_uid_zero() {
   uid=`id -u`
   if [ "$uid" != 0 ]; then
-    fail "E_UID_NONZERO" "go-c8y-cli install.sh must run as root; please try running with sudo or running\n\`curl $INSTALL_URL | sudo bash\`."
+    fail "E_UID_NONZERO" "go-c8y-cli install.sh must run as root; please try running with sudo or running\n\`curl <todo> | sudo bash\`."
   fi
 }
 
 get_latest_tag () {
-    curl https://api.github.com/repos/$OWNER/$REPO/releases/latest -H "Accept: application/vnd.github.v3+json" --silent | grep tag_name | cut -d '"' -f 4
+  local resp=$( curl https://api.github.com/repos/$OWNER/$REPO/releases -H "Accept: application/vnd.github.v3+json" -H "$CURL_AUTH_HEADER" -sL )
+  local tag_name=$( echo "$resp" | grep tag_name | head -1 | cut -d '"' -f 4 )
+  local url=$( echo "$resp" | grep browser_download_url | grep releases | head -1 | cut -d '"' -f 4 )
+  
+  # tag can be different to actual tag name (i.e. draft releases)
+  local browser_url="${url%/*}"
+  local real_tag_name="${browser_url##*/}"
+  echo "$tag_name $real_tag_name $browser_url"
 }
 
 get_architecture () {
@@ -96,8 +107,12 @@ get_architecture () {
         echo amd64;;
       i?86)
         echo i386;;
-      armv5|armv6|armv7)
-        echo "armel";;
+      armv5)
+        echo "armv5";;
+      armv6)
+        echo "armv6";;
+      armv7)
+        echo "armv7";;
       arm*)
         echo "arm64";;
     esac
@@ -107,109 +122,131 @@ get_architecture () {
 get_os () {
   local osname="linux"
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-      osname=linux
+    osname=linux
   elif [[ "$OSTYPE" == "darwin"* ]]; then
-      osname=macos
+    osname=macOS
   elif [[ "$OSTYPE" == "cygwin" ]]; then
-      osname=windows
+    osname=windows
   elif [[ "$OSTYPE" == "msys" ]]; then
-      osname=windows
+    osname=windows
   elif [[ "$OSTYPE" == "linux"* ]]; then
-      osname=linux
+    osname=linux
   else
-      # assume windows
-      osname=windows
+    # assume windows
+    osname=windows
   fi
   echo $osname
 }
 
-install_c8y_binary () {
-    bold="\e[1m"
-    normal="\e[0m"
-    red="\e[31m"
-    green="\e[32m"
+install_binary () {
+  bold="\e[1m"
+  normal="\e[0m"
+  red="\e[31m"
+  green="\e[32m"
 
-    VERSION=${1:-latest}
-    INSTALL_PATH=${2:-/usr/local/bin}
+  VERSION=${1:-latest}
+  INSTALL_PATH=${2:-/usr/local/bin}
 
-    if [ ! -d "$INSTALL_PATH" ]; then
-        mkdir -p "$INSTALL_PATH"
-    fi
+  if [ ! -d "$INSTALL_PATH" ]; then
+    mkdir -p "$INSTALL_PATH"
+  fi
 
-    current_version=
-    if [[ $(command -v c8y) ]]; then
-      current_version=$( c8y version --select version --output csv 2> /dev/null || true | tail -1 )
-      if [[ "$current_version" == "" ]]; then
-        current_version=$( c8y version 2> /dev/null | tail -1 | cut -d'-' -f1 | xargs )
-      fi
-    fi
+  current_version=
+  if [[ $(command -v c8y) ]]; then
+    # TODO: Check if the c8y command is really a binary, if not then delete it
 
-    if [[ "$VERSION" == "latest" ]]; then
-        VERSION=$( get_latest_tag )
-    fi
-
-    # Get binary name based on os type
-    BINARY_SUFFIX=
-    if [[ $PLATFORM_TUPLE == *"windows"* ]]; then
-        BINARY_SUFFIX=".exe"
-    fi
-    BINARY_NAME="c8y.$PLATFORM_TUPLE$BINARY_SUFFIX"
-
-    if [[ "$current_version" == "$VERSION" ]]; then
-        echo -e "${green}$BINARY_NAME is already up to date: ${VERSION}${normal}"
-        return 0
-    fi
-
-    # try to download latest c8y version
+    current_version=$( c8y version --select version --output csv --noLog 2> /dev/null || true | tail -1 )
     if [[ "$current_version" == "" ]]; then
-      echo -n "downloading ($BINARY_NAME $VERSION)..."
-    else
-      echo -n "updating ($BINARY_NAME) from $current_version to $VERSION..."
+      current_version=$( c8y version 2> /dev/null | tail -1 | cut -d'-' -f1 | xargs )
     fi
+  fi
+  # echo "Getting latest version"
 
-    c8ytmp=./.c8y.tmp
-    BINARY_URL="https://github.com/$OWNER/$REPO/releases/download/$VERSION/$BINARY_NAME"
-    if curl -A "$CURL_USER_AGENT" -fsL $BINARY_URL -o $c8ytmp
-    then
-      echo -e "${green}OK${normal}"
-    else
-      echo -e "${red}FAILED\nURL: $BINARY_URL${normal}"
-      return
-    fi
+  RELEASE_BASE_URL="https://github.com/$OWNER/$REPO/releases/download/$VERSION"
+  if [[ "$VERSION" == "latest" ]]; then
+    local LATEST_VERSION=$( get_latest_tag )
+    VERSION=$( echo "$LATEST_VERSION" | cut -d ' ' -f 1 )
+    TAG=$( echo "$LATEST_VERSION" | cut -d ' ' -f 2 )
+    RELEASE_BASE_URL=$( echo "$LATEST_VERSION" | cut -d ' ' -f 3 )
+  fi
 
-    chmod +x $c8ytmp
+  if [[ "$VERSION" != "$TAG" ]]; then
+    echo "Latest version: $VERSION (tag=$TAG)"
+  else
+    echo "Latest version: $TAG"
+  fi
 
-    new_version=$($c8ytmp version 2>/dev/null | tail -1)
+  if [[ "${current_version#v}" == "${VERSION#v}" ]]; then
+    echo -e "${green}c8y is already up to date: ${VERSION}${normal}"
+    return 0
+  fi
 
-    if [ "$new_version" = "" ]; then
-        if [[ $(cat $c8ytmp | head -1 | grep ELF) ]]; then
-            echo -e "${red}Failed download latest version: err=Unknown binary error${normal}"
-        else
-            echo -e "${red}Failed download latest version: err=$(cat .c8y.tmp | head -1)${normal}"
-        fi
-        rm -f .c8y.tmp
-        return 1
-    else
-        mv $c8ytmp $INSTALL_PATH/c8y
-    fi
+  if [[ "$current_version" == "" ]]; then
+    echo "installing $VERSION"
+  else
+    echo "updating from $current_version to $VERSION"
+  fi
 
-    if [[ ! $(command -v c8y) ]]; then
-        echo "Adding install path ($INSTALL_PATH) to PATH variable"
-        export PATH=${PATH}:$INSTALL_PATH
-    fi
+  install_binary_release $RELEASE_BASE_URL $VERSION $TAG
 
-    # show new version
-    c8y version
+  if [[ ! $(command -v c8y) ]]; then
+    echo "Adding install path ($INSTALL_PATH) to PATH variable"
+    export PATH=${PATH}:$INSTALL_PATH
+  fi
+
+  # show new version
+  c8y version --noLog
+}
+
+install_binary_release() {
+  # Get binary name based on os type
+  local base_url=${1:-}
+  local version=${2:-}
+  local tag=${3:-}
+  local PACKAGE="c8y_${version#v}_${PLATFORM_TUPLE}"
+  local ARCHIVE="$PACKAGE.tar.gz"
+  local BINARY_NAME="c8y"
+  if [[ $PLATFORM_TUPLE == *"windows"* ]]; then
+    ARCHIVE="$PACKAGE.zip"
+    BINARY_NAME="c8y.exe"
+  fi
+
+  local URL="$base_url/$ARCHIVE"
+
+  tmp=$( mktemp -d -t go-c8y-cli-XXXXXXXXXX )
+  download_asset $TAG $ARCHIVE "$tmp/$ARCHIVE"
+  
+  tar zxf "$tmp/$ARCHIVE" -C "$tmp"
+
+  echo "Installing c8y to /usr/local/bin."
+  [ -d /usr/local/bin ] || install -o 0 -g 0 -d /usr/local/bin
+  install -o 0 -g 0 "$tmp/$PACKAGE/bin/"c8y* /usr/local/bin
+  # install -o 0 -g 0 -d /usr/local/share/doc/c8y/
+  # install -o 0 -g 0 -m 644 $tmp/$PACKAGE/LICENSES /usr/local/share/doc/c8y/
+  rm -Rf $tmp
+}
+
+download_asset () {
+  local tag=${1:-}
+  local FILE=${2:-}
+  local ARCHIVE=${3:-}
+  release_info=$( curl "https://api.github.com/repos/$OWNER/$REPO/releases/tags/$tag" -H "Accept: application/vnd.github.v3+json" -H "$CURL_AUTH_HEADER" -fsL )
+
+  parser=".assets | map(select(.name == \"$FILE\"))[0].id"
+  asset_id=$( echo "$release_info" | jq "$parser" )
+  local URL="https://api.github.com/repos/$OWNER/$REPO/releases/assets/$asset_id"
+  echo "Downloading:" $URL
+  curl -A "$CURL_USER_AGENT" -H 'Accept: application/octet-stream' -H "$CURL_AUTH_HEADER" -fsL "$URL" > "$ARCHIVE"
 }
 
 install_addons () {
-    git clone https://github.com/$OWNER/${ADDON_REPO}.git
+  git clone https://github.com/$OWNER/${ADDON_REPO}.git
 }
 
 detect_platform
 assert_dependencies
 assert_uid_zero
-install_c8y_binary
+install_binary
 
 }
 
