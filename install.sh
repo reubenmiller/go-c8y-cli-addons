@@ -30,6 +30,7 @@ ADDON_REPO=go-c8y-cli-addons
 GO_C8Y_CLI_VERSION=latest
 CURL_AUTH_HEADER=
 GITHUB_TOKEN=${GITHUB_TOKEN:-}
+SCRIPT_DIR=$( dirname "$0" )
 
 if [[ "$GITHUB_TOKEN" != "" ]]; then
   CURL_AUTH_HEADER="Authorization: Bearer $GITHUB_TOKEN"
@@ -77,6 +78,7 @@ assert_dependencies() {
   type -p grep > /dev/null || fail "E_GREP_MISSING" "Please install grep(1)."
   type -p cut > /dev/null || fail "E_CUT_MISSING" "Please install cut(1)."
   type -p git > /dev/null || fail "E_GIT_MISSING" "Please install git(1)."
+  type -p jq > /dev/null || fail "E_JQ_MISSING" "Please install jq(1)."
   type -p xargs > /dev/null || fail "E_XARGS_MISSING" "Please install xargs(1)."
 }
 
@@ -243,10 +245,66 @@ install_addons () {
   git clone https://github.com/$OWNER/${ADDON_REPO}.git
 }
 
+install_profile_fish () {
+  if ! command -v fish &> /dev/null; then
+    return
+  fi
+
+  local profile=~/.config/fish/config.fish
+  local plugin_name=c8y.plugin.fish
+
+  if [[ ! -z $( grep "$plugin_name" "$profile" ) ]]; then
+    return
+  fi
+
+  echo "adding fish plugin"
+  if [[ ! -f ~/.config/fish/config.fish ]]; then
+    touch ~/.config/fish/config.fish
+    chown $SUDO_USER:$SUDO_USER ~/.config/fish/config.fish
+  fi
+
+  if [ -d ~/.cumulocity ]; then
+    echo 'export C8Y_SESSION_HOME=~/.cumulocity' >> ~/.config/fish/config.fish
+  fi
+  echo 'source ~/.go-c8y-cli/shell/'"$plugin_name" >> ~/.config/fish/config.fish
+}
+
+install_profile_zsh () {
+  if [ ! -d ~/.oh-my-zsh ]; then
+    return
+  fi
+  local profile=~/.zshrc
+  if [[ ! -z $( grep "c8y" $profile ) ]]; then
+    return
+  fi
+  echo "adding zsh plugin"
+  mkdir -p ~/.oh-my-zsh/custom/plugins/c8y/
+  chown -R $SUDO_USER:$SUDO_USER ~/.oh-my-zsh/custom/plugins/c8y/
+  cp "$SCRIPT_DIR/shell/c8y.plugin.zsh" ~/.oh-my-zsh/custom/plugins/c8y/
+  sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y)/' $profile
+}
+
+install_profile_bash () {
+  local profile=~/.bashrc
+  local plugin_name=c8y.plugin.sh
+  if [[ ! -z $( grep $plugin_name $profile ) ]]; then
+    return
+  fi
+
+  echo "adding bash plugin"
+  if [ -d ~/.cumulocity ]; then
+    echo 'export C8Y_SESSION_HOME=~/.cumulocity' >> "$profile"
+  fi
+  echo 'source ~/.go-c8y-cli/shell/'"$plugin_name" >> "$profile"
+}
+
 detect_platform
 assert_dependencies
 assert_uid_zero
 install_binary
+install_profile_bash
+install_profile_zsh
+install_profile_fish
 
 }
 
