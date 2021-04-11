@@ -270,18 +270,23 @@ install_profile_fish () {
 }
 
 install_profile_zsh () {
-  if [ ! -d ~/.oh-my-zsh ]; then
+  if [[ ! -d ~/.oh-my-zsh ]]; then
     return
   fi
   local profile=~/.zshrc
-  if [[ ! -z $( grep "c8y" $profile ) ]]; then
+  if [[ ! -z $( grep "c8y" "$profile" ) ]]; then
     return
   fi
   echo "adding zsh plugin"
+
+  if [ -d ~/.cumulocity ]; then
+    echo 'export C8Y_SESSION_HOME=~/.cumulocity' >> "$profile"
+  fi
+
   mkdir -p ~/.oh-my-zsh/custom/plugins/c8y/
   chown -R $SUDO_USER:$SUDO_USER ~/.oh-my-zsh/custom/plugins/c8y/
   cp "$SCRIPT_DIR/shell/c8y.plugin.zsh" ~/.oh-my-zsh/custom/plugins/c8y/
-  sed -iE 's/plugins=(\(.*\))/plugins=(\1 c8y)/' $profile
+  sed -iE 's/^plugins=(\(.*\))/plugins=(\1 c8y)/' $profile
 }
 
 install_profile_bash () {
