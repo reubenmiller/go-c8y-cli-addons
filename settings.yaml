@@ -10,11 +10,11 @@ settings:
   template:
     path: "$C8Y_HOME/templates"
   views:
-    custompaths:
+    commonPaths:
     - "$C8Y_HOME/views/default"
     columnMinWidth: 5
     columnMaxWidth: 80
     columnPadding: 5
   commonAliases:
     recentAlarms: alarms list --dateFrom -1h
-    mo: inventory get --view none --output json --id '$1'
+    mo: inventory get --view off --output json --id '$1'
