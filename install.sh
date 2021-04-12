@@ -258,13 +258,14 @@ install_profile_fish () {
   fi
 
   echo "adding fish plugin"
+  mkdir -p ~/.config/fish/
   if [[ ! -f ~/.config/fish/config.fish ]]; then
     touch ~/.config/fish/config.fish
     chown $SUDO_USER:$SUDO_USER ~/.config/fish/config.fish
   fi
 
   if [ -d ~/.cumulocity ]; then
-    echo 'export C8Y_SESSION_HOME=~/.cumulocity' >> ~/.config/fish/config.fish
+    echo 'set -gx C8Y_SESSION_HOME ~/.cumulocity' >> ~/.config/fish/config.fish
   fi
   echo 'source ~/.go-c8y-cli/shell/'"$plugin_name" >> ~/.config/fish/config.fish
 }
