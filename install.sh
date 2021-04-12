@@ -101,10 +101,10 @@ get_latest_tag () {
 }
 
 get_architecture () {
-  if [[ $(command -v dpkg) ]]; then
-    dpkg --print-architecture
-  else
-    case "$( uname -m )" in
+  # if [[ $(command -v dpkg) ]]; then
+  #   dpkg --print-architecture    
+  # fi
+  case "$( uname -m )" in
       x86_64|amd64)
         echo amd64;;
       i?86)
@@ -118,7 +118,6 @@ get_architecture () {
       arm*)
         echo "arm64";;
     esac
-  fi
 }
 
 get_os () {
