@@ -104,7 +104,7 @@ get_architecture () {
   if [[ $(command -v dpkg) ]]; then
     dpkg --print-architecture
   else
-    case "$( uname -i )" in
+    case "$( uname -m )" in
       x86_64|amd64)
         echo amd64;;
       i?86)
