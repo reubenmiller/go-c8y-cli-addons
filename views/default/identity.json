@@ -4,7 +4,7 @@
         {
             "name": "externalId",
             "priority": 500,
-            "contentType": "vnd.com.nsn.cumulocity.externalId",
+            "contentType": "vnd.com.nsn.cumulocity.externalid",
             "columns": [
                 "type",
                 "externalId",
