@@ -30,6 +30,7 @@ ADDON_REPO=go-c8y-cli-addons
 GO_C8Y_CLI_VERSION=latest
 CURL_AUTH_HEADER=
 GITHUB_TOKEN=${GITHUB_TOKEN:-}
+INSTALL_PATH=${INSTALL_PATH:-"/usr/local/bin"}
 SCRIPT_DIR=$( dirname "$0" )
 
 if [[ "$GITHUB_TOKEN" != "" ]]; then
@@ -146,11 +147,6 @@ install_binary () {
   green="\e[32m"
 
   VERSION=${1:-latest}
-  INSTALL_PATH=${2:-/usr/local/bin}
-
-  if [ ! -d "$INSTALL_PATH" ]; then
-    mkdir -p "$INSTALL_PATH"
-  fi
 
   current_version=
   if [[ $(command -v c8y) ]]; then
@@ -190,8 +186,13 @@ install_binary () {
 
   install_binary_release $RELEASE_BASE_URL $VERSION $TAG
 
+  if [[ ! ":$PATH:" == *":$INSTALL_PATH:"* ]]; then
+    echo ""
+    echo "*** WARNING ***"
+    echo -e "\nThe PATH variable ($PATH) is missing the install directory: $INSTALL_PATH\n\nPlease add it using\n\n    export PATH=$INSTALL_PATH:\$PATH\n\n"
+  fi
+
   if [[ ! $(command -v c8y) ]]; then
-    echo "Adding install path ($INSTALL_PATH) to PATH variable"
     export PATH=${PATH}:$INSTALL_PATH
   fi
 
@@ -219,9 +220,9 @@ install_binary_release() {
   
   tar zxf "$tmp/$ARCHIVE" -C "$tmp"
 
-  echo "Installing c8y to /usr/local/bin."
-  [ -d /usr/local/bin ] || install -o 0 -g 0 -d /usr/local/bin
-  install -o 0 -g 0 "$tmp/$PACKAGE/bin/"c8y* /usr/local/bin
+  echo "Installing c8y to $INSTALL_PATH"
+  [ -d "$INSTALL_PATH" ] || install -o 0 -g 0 -d "$INSTALL_PATH"
+  install -o 0 -g 0 "$tmp/$PACKAGE/bin/"c8y* $INSTALL_PATH
   # install -o 0 -g 0 -d /usr/local/share/doc/c8y/
   # install -o 0 -g 0 -m 644 $tmp/$PACKAGE/LICENSES /usr/local/share/doc/c8y/
   rm -Rf $tmp
@@ -317,9 +318,19 @@ install_profile_bash () {
   fi
 }
 
+assert_no_old_version () {
+  if [[ -n $(command -v c8y) ]]; then
+
+    if ! c8y version --select version --output csv 2> /dev/null > /dev/null; then
+      fail "E_INVALID_V1_VERSION" "an old version of c8y go-c8y-cli was detected. path=$c8y_path; please remove it and try again."
+    fi
+  fi
+}
+
 detect_platform
 assert_dependencies
 assert_uid_zero
+assert_no_old_version
 install_binary
 install_profile_bash
 install_profile_zsh
