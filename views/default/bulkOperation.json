@@ -9,6 +9,7 @@
                 "id",
                 "groupId",
                 "status",
+                "operationPrototype.description",
                 "startDate",
                 "creationRamp",
                 "generalStatus",
