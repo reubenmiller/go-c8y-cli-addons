@@ -322,6 +322,7 @@ assert_no_old_version () {
   if [[ -n $(command -v c8y) ]]; then
 
     if ! c8y version --select version --output csv 2> /dev/null > /dev/null; then
+      c8y_path=$( which c8y )
       fail "E_INVALID_V1_VERSION" "an old version of c8y go-c8y-cli was detected. path=$c8y_path; please remove it and try again."
     fi
   fi
