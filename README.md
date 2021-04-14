@@ -13,6 +13,15 @@ WIP - Work in Progress
 
 2. Install go-c8y-cli binary
 
+    **Option 1: without sudo**
+
+    ```sh
+    ~/.go-c8y-cli/install.sh
+    ```
+
+    **Option 2: with sudo**
+    If you want to make the c8y globally available, then you can run it using sudo, which will install it under `/usr/local/bin`.
+
     ```sh
     sudo -E ~/.go-c8y-cli/install.sh
     ```

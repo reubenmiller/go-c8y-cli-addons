@@ -30,7 +30,7 @@ ADDON_REPO=go-c8y-cli-addons
 GO_C8Y_CLI_VERSION=latest
 CURL_AUTH_HEADER=
 GITHUB_TOKEN=${GITHUB_TOKEN:-}
-INSTALL_PATH=${INSTALL_PATH:-"/usr/local/bin"}
+INSTALL_PATH=${INSTALL_PATH:-}
 SCRIPT_DIR=$( dirname "$0" )
 
 if [[ "$GITHUB_TOKEN" != "" ]]; then
@@ -81,6 +81,18 @@ assert_dependencies() {
   type -p git > /dev/null || fail "E_GIT_MISSING" "Please install git(1)."
   type -p jq > /dev/null || fail "E_JQ_MISSING" "Please install jq(1)."
   type -p xargs > /dev/null || fail "E_XARGS_MISSING" "Please install xargs(1)."
+}
+
+set_install_path() {
+  if [[ -n "$INSTALL_PATH" ]]; then
+    return
+  fi
+  uid=`id -u`
+  if [ "$uid" != 0 ]; then
+    INSTALL_PATH=~/bin
+  else
+    INSTALL_PATH=/usr/local/bin
+  fi
 }
 
 assert_uid_zero() {
@@ -330,7 +342,7 @@ assert_no_old_version () {
 
 detect_platform
 assert_dependencies
-assert_uid_zero
+set_install_path
 assert_no_old_version
 install_binary
 install_profile_bash
