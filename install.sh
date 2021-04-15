@@ -234,10 +234,16 @@ install_binary_release() {
   tar zxf "$tmp/$ARCHIVE" -C "$tmp"
 
   echo "Installing c8y to $INSTALL_PATH"
-  [ -d "$INSTALL_PATH" ] || install -o 0 -g 0 -d "$INSTALL_PATH"
-  install -o 0 -g 0 "$tmp/$PACKAGE/bin/"c8y* $INSTALL_PATH
-  # install -o 0 -g 0 -d /usr/local/share/doc/c8y/
-  # install -o 0 -g 0 -m 644 $tmp/$PACKAGE/LICENSES /usr/local/share/doc/c8y/
+  if [ "$(id -u)" != 0 ]; then
+    # non-root
+    [ -d "$INSTALL_PATH" ] || install -d "$INSTALL_PATH"
+    install "$tmp/$PACKAGE/bin/"c8y* $INSTALL_PATH
+  else
+    # root
+    [ -d "$INSTALL_PATH" ] || install -o 0 -g 0 -d "$INSTALL_PATH"
+    install -o 0 -g 0 "$tmp/$PACKAGE/bin/"c8y* $INSTALL_PATH
+  fi
+
   rm -Rf $tmp
 }
 
