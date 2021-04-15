@@ -210,7 +210,7 @@ install_binary () {
   fi
 
   # show new version
-  c8y version --noLog
+  "$INSTALL_PATH/c8y" version --noLog
 }
 
 install_binary_release() {
