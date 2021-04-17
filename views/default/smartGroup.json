@@ -1,0 +1,20 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "smartgroup",
+            "priority": 500,
+            "type": "c8y_DynamicGroup",
+            "fragments": ["c8y_IsDynamicGroup"],
+            "columns": [
+                "id",
+                "name",
+                "c8y_DeviceQueryString",
+                "type",
+                "owner",
+                "lastUpdated",
+                "c8y_IsDynamicGroup.invisible"
+            ]
+        }
+    ]
+}
