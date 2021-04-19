@@ -1,0 +1,10 @@
+# Auto detect text files and perform LF normalization
+*       text=auto
+
+*.txt   text
+*.xml   text diff=xml
+# Shell scripts require LF
+*.md    text eol=lf
+*.sh    text eol=lf
+*.fish    text eol=lf
+*.zsh    text eol=lf
