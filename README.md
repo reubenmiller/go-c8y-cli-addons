@@ -6,6 +6,8 @@ WIP - Work in Progress
 
 1. Clone the repository
 
+    **Shell (bash/zsh/fish)**
+
     ```sh
     git clone https://github.com/reubenmiller/go-c8y-cli-addons.git ~/.go-c8y-cli
     cd ~/.go-c8y-cli
