@@ -5,9 +5,9 @@ export LANG=C.UTF-8
 export LC_ALL=C.UTF-8
 
 C8Y_SHELL=bash
-if [[ -v BASH_VERSION ]]; then
+if [[ "$BASH_VERSION" != "" ]]; then
     C8Y_SHELL=bash
-elif [[ -v ZSH_VERSION ]]; then
+elif [[ "$ZSH_VERSION" != "" ]]; then
     C8Y_SHELL=zsh
 fi
 
