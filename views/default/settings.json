@@ -2,6 +2,16 @@
     "version": "1",
     "definitions": [
         {
+            "name": "session",
+            "priority": 400,
+            "fragments": ["host", "username"],
+            "columns": [
+                "host",
+                "tenant",
+                "username"
+            ]
+        },
+        {
             "name": "settings",
             "priority": 500,
             "fragments": ["settings.defaults"],
