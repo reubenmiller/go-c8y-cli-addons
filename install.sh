@@ -165,7 +165,7 @@ install_binary () {
   if [[ $(command -v c8y) ]]; then
     # TODO: Check if the c8y command is really a binary, if not then delete it
 
-    current_version=$( c8y version --select version --output csv --noLog 2> /dev/null || true | tail -1 )
+    current_version=$( c8y version --select version --output csv 2> /dev/null || true | tail -1 )
     if [[ "$current_version" == "" ]]; then
       current_version=$( c8y version 2> /dev/null | tail -1 | cut -d'-' -f1 | xargs )
     fi
@@ -202,7 +202,7 @@ install_binary () {
   if [[ ! ":$PATH:" == *":$INSTALL_PATH:"* ]]; then
     echo ""
     echo "*** WARNING ***"
-    echo -e "\nThe PATH variable ($PATH) is missing the install directory: $INSTALL_PATH\n\nPlease add it using\n\n    export PATH=$INSTALL_PATH:\$PATH\n\n"
+    echo -e "\nThe PATH variable (\$PATH) is missing the install directory: $INSTALL_PATH\n\nPlease add it using\n\n    export PATH=$INSTALL_PATH:\$PATH\n\n"
   fi
 
   if [[ ! $(command -v c8y) ]]; then
@@ -210,7 +210,7 @@ install_binary () {
   fi
 
   # show new version
-  "$INSTALL_PATH/c8y" version --noLog
+  "$INSTALL_PATH/c8y" version
 }
 
 install_binary_release() {
@@ -284,26 +284,72 @@ install_profile_fish () {
   local plugin_name=c8y.plugin.fish
 
   if [ -d ~/.cumulocity ]; then
-    if [[ -z $( grep "C8Y_SESSION_HOME" "$profile" ) ]]; then
+    if ! grep -q "C8Y_SESSION_HOME" "$profile"; then
       echo "adding C8Y_SESSION_HOME variable to $profile"
       echo 'set -gx C8Y_SESSION_HOME ~/.cumulocity' >> "$profile"
     fi
   fi
 
-  if [[ -z $( grep "$plugin_name" "$profile" ) ]]; then
+  if ! grep -q "$plugin_name" "$profile"; then
     echo 'source ~/.go-c8y-cli/shell/'"$plugin_name" >> ~/.config/fish/config.fish
   fi
 }
 
 install_profile_zsh () {
-  if [[ ! -d ~/.oh-my-zsh ]]; then
+  if ! command -v zsh &> /dev/null; then
     return
   fi
+
   local profile=~/.zshrc
+  local plugin_name=c8y.plugin.zsh
+
+  if [[ ! -d ~/.oh-my-zsh ]]; then
+    # TODO: Handle vanilla zsh (without oh-my-zsh)
+    local custom_completion=~/.go-c8y-cli/completions-zsh
+
+    if [[ ! -d "$custom_completion" ]]; then
+      mkdir -p "$custom_completion"
+      if [[ -n "$SUDO_USER" ]]; then
+        chown -R $SUDO_USER "$custom_completion"
+      fi
+    fi
+
+    if [[ ! -f "$profile" ]]; then
+      # create zshrc profile 
+      touch "$profile"
+
+      if [[ -n "$SUDO_USER" ]]; then
+        chown -R $SUDO_USER "$profile"
+      fi
+    fi
+
+    if ! grep -q "PROMPT=" "$profile"; then
+      echo "PROMPT='%(?.%F{green}√.%F{red}?%?)%f %B%F{240}%1~%f%b %# '" >> "$profile"
+    fi
+
+    c8y completion zsh > "$custom_completion/_c8y"
+
+    if ! grep -q "$plugin_name" "$profile"; then
+      echo "fpath=($custom_completion \$fpath)" >> "$profile"
+      
+      echo "autoload -U compinit; compinit" >> "$profile"      
+      echo 'source ~/.go-c8y-cli/shell/'"$plugin_name" >> "$profile"
+    fi
+
+    if [ -d ~/.cumulocity ]; then
+      if ! grep -q "C8Y_SESSION_HOME" "$profile"; then
+        echo "adding C8Y_SESSION_HOME variable to $profile"
+        echo 'export C8Y_SESSION_HOME=~/.cumulocity' >> "$profile"
+      fi
+    fi
+
+    return
+  fi
+  
   echo "adding zsh plugin"
 
   if [ -d ~/.cumulocity ]; then
-    if [[ -z $( grep "C8Y_SESSION_HOME" "$profile" ) ]]; then
+    if ! grep -q "C8Y_SESSION_HOME" "$profile"; then
       echo "adding C8Y_SESSION_HOME variable to $profile"
       echo 'export C8Y_SESSION_HOME=~/.cumulocity' >> "$profile"
     fi
@@ -315,7 +361,7 @@ install_profile_zsh () {
     chown -R $SUDO_USER ~/.oh-my-zsh/custom/plugins/c8y/
   fi
 
-  if [[ -z $( grep "c8y" "$profile" ) ]]; then
+  if ! grep -q "c8y" "$profile"; then
     sed -iE 's/^plugins=(\(.*\))/plugins=(\1 c8y)/' $profile
   fi
 }
@@ -326,13 +372,13 @@ install_profile_bash () {
 
   echo "adding bash plugin"
   if [ -d ~/.cumulocity ]; then
-    if [[ -z $( grep "C8Y_SESSION_HOME" "$profile" ) ]]; then
+    if ! grep -q "C8Y_SESSION_HOME" "$profile"; then
       echo "adding C8Y_SESSION_HOME variable to $profile"
       echo 'export C8Y_SESSION_HOME=~/.cumulocity' >> "$profile"
     fi
   fi
 
-  if [[ -z $( grep $plugin_name $profile ) ]]; then
+  if ! grep -q $plugin_name $profile; then
     echo 'source ~/.go-c8y-cli/shell/'"$plugin_name" >> "$profile"
   fi
 }

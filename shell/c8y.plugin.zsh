@@ -31,18 +31,13 @@ init-c8y () {
     if [[ $(command -v c8y) ]]; then
         if [ "$C8Y_SHELL" = "zsh" ]; then
 
-            mkdir -p "$ZSH_CUSTOM/plugins/c8y"
+            if [[ -n "$ZSH_CUSTOM" ]]; then
+                mkdir -p "$ZSH_CUSTOM/plugins/c8y"
 
-            if [ ! -f "$ZSH_CUSTOM/plugins/c8y/_c8y" ]; then
-                c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
-
-                # create session home folder (if it does not exist)
-                sessionhome=$( c8y settings list --select "session.home" --output csv )
-                if [[ ! -e "$sessionhome" ]]; then
-                    echo "creating folder"
-                    mkdir -p "$sessionhome"
+                if [ ! -f "$ZSH_CUSTOM/plugins/c8y/_c8y" ]; then
+                    c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
+                    echo -e "${green}Updated c8y completions. \n\n${bold}Please load your zsh profile again using 'source ~/.zshrc'${normal}"
                 fi
-                echo -e "${green}Updated c8y completions. \n\n${bold}Please load your zsh profile again using 'source ~/.zshrc'${normal}"
             fi
         fi
 
