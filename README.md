@@ -13,6 +13,13 @@ WIP - Work in Progress
     cd ~/.go-c8y-cli
     ```
 
+    **PowerShell**
+
+    ```sh
+    git clone https://github.com/reubenmiller/go-c8y-cli-addons.git $HOME/.go-c8y-cli
+    cd $HOME/.go-c8y-cli
+    ```
+
 2. Install go-c8y-cli binary
 
     **Option 1: without sudo**
@@ -26,6 +33,12 @@ WIP - Work in Progress
 
     ```sh
     sudo -E ~/.go-c8y-cli/install.sh
+    ```
+
+    **PowerShell**
+
+    ```sh
+    & "$HOME/.go-c8y-cli/install.ps1"
     ```
 
 3. Create a new session (if you do not already have one)
@@ -50,8 +63,16 @@ WIP - Work in Progress
 
 1. Run the install script again
 
+    **Shell (bash/zsh/fish)**
+
     ```sh
     ~/.go-c8y-cli/install.sh
+    ```
+
+    **PowerShell**
+
+    ```sh
+    & $HOME/.go-c8y-cli/install.ps1
     ```
 
     **Note**
