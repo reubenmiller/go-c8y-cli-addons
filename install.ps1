@@ -13,6 +13,8 @@ Param(
 
 Set-StrictMode -Version 3
 
+$UserHome = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath("~")
+
 # Expand install path (but it might not yet exist)
 $InstallPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($InstallPath)
 
@@ -24,7 +26,7 @@ Function Invoke-CheckoutAddons {
     [cmdletbinding()]
     Param()
 
-    $Destination = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath("~/.go-c8y-cli")
+    $Destination = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath("$UserHome/.go-c8y-cli")
 
     if (Test-Path $Destination) {
         Write-Verbose "Addon repository has already been cloned to $Destination"
@@ -300,7 +302,7 @@ Function Add-ToProfile {
     
     $ImportSnippet = @(
         $PathStatement,
-        ". ~/.go-c8y-cli/shell/c8y.plugin.ps1"
+        ". $UserHome/.go-c8y-cli/shell/c8y.plugin.ps1"
     )
     if (-Not (Select-String -Path $PROFILE -SimpleMatch -Pattern $ImportSnippet[1] -Quiet)) {
         Write-Verbose "Adding imports to profile"
@@ -308,7 +310,7 @@ Function Add-ToProfile {
     }
 
     # Importing script (for immediate usage)
-    . "~/.go-c8y-cli/shell/c8y.plugin.ps1"
+    . "$UserHome/.go-c8y-cli/shell/c8y.plugin.ps1"
 }
 
 #

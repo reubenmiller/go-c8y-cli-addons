@@ -104,4 +104,9 @@ Function set-c8ymode-dev () { set-c8ymode dev; }
 Function set-c8ymode-qual () { set-c8ymode qual; }
 Function set-c8ymode-prod () { set-c8ymode prod; }
 
+Function update-c8y () {
+    $UserHome = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath("~")
+    & "$UserHome/.go-c8y-cli/install.ps1"
+}
+
 # Function source { $input | Out-String | Invoke-Expression }
