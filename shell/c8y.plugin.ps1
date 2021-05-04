@@ -30,7 +30,6 @@ Set-Session myhost
 
 Set session and only show session matching "myhost"
 #>
-    [cmdletbinding()]
     Param()
 
     $c8yenv = c8y sessions set --noColor=false $args
