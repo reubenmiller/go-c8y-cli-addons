@@ -111,6 +111,11 @@ set-c8ymode-dev () { set-c8ymode dev; }
 set-c8ymode-qual () { set-c8ymode qual; }
 set-c8ymode-prod () { set-c8ymode prod; }
 
+update-c8y () {
+    git -C "~/.go-c8y-cli" pull > /dev/null
+    ~/.go-c8y-cli/install.sh
+}
+
 ########################################################################
 # c8y aliases
 ########################################################################
