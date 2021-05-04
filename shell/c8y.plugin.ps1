@@ -14,12 +14,13 @@ Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
 # Autocompletion for arrow keys
 Set-PSReadlineKeyHandler -Key UpArrow -Function HistorySearchBackward
 Set-PSReadlineKeyHandler -Key DownArrow -Function HistorySearchForward
+Set-PSReadLineOption -HistorySearchCursorMovesToEnd
 
 ########################################################################
 # c8y helpers
 ########################################################################
 
-Function Set-Session {
+Function set-session {
 <#
 .SYNOPSIS
 Switch Cumulocity session interactively
@@ -40,7 +41,7 @@ Set session and only show session matching "myhost"
     $c8yenv | Out-String | Invoke-Expression
 }
 
-Function Clear-Session {
+Function clear-session {
 <#
 .SYNOPSIS
 Clear all cumulocity session variables
@@ -98,5 +99,9 @@ Enable dev mode (enables POST, PUT and DELETE commands)
     c8y settings update --shell auto mode $Mode $Options | source
     Write-Host "Enabled "$Mode" mode (temporarily)" -ForegroundColor Green
 }
+
+Function set-c8ymode-dev () { set-c8ymode dev; }
+Function set-c8ymode-qual () { set-c8ymode qual; }
+Function set-c8ymode-prod () { set-c8ymode prod; }
 
 # Function source { $input | Out-String | Invoke-Expression }
