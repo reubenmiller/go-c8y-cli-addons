@@ -306,6 +306,9 @@ Function Add-ToProfile {
         Write-Verbose "Adding imports to profile"
         Add-Content -Path $PROFILE -Value ($ImportSnippet -join "`n")
     }
+
+    # Importing script (for immediate usage)
+    . "~/.go-c8y-cli/shell/c8y.plugin.ps1"
 }
 
 #
