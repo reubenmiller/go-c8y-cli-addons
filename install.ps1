@@ -11,8 +11,6 @@ Param(
     [switch] $SkipVersionCheck
 )
 
-Set-StrictMode -Version 3
-
 $UserHome = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath("~")
 
 # Expand install path (but it might not yet exist)
