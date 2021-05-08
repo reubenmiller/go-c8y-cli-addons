@@ -15,7 +15,7 @@
         {
             "name": "settings",
             "priority": 500,
-            "fragments": ["settings.defaults"],
+            "fragments": ["settings", "settings.session.home"],
             "columns": [
                 "session.home",
                 "mode.**",
