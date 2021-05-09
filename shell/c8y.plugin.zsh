@@ -12,19 +12,19 @@ elif [[ "$ZSH_VERSION" != "" ]]; then
 fi
 
 install_bash_dependencies () {
-    if [[ ! -d ~/.bash_completion.d ]]; then
-        mkdir -p ~/.bash_completion.d
+    if [[ ! -d "$HOME/.bash_completion.d" ]]; then
+        mkdir -p "$HOME/.bash_completion.d"
     fi
 
-    if [ ! -f ~/.bash_completion.d/complete_alias ]; then
+    if [ ! -f "$HOME/.bash_completion.d/complete_alias" ]; then
         echo "Installing bash completion for aliases"
         curl -sfL https://raw.githubusercontent.com/cykerway/complete-alias/master/complete_alias \
-                > ~/.bash_completion.d/complete_alias
+                > "$HOME/.bash_completion.d/complete_alias"
     fi
 
     # Enable completion for aliases
     [ -f /usr/share/bash-completion/bash_completion ] && source /usr/share/bash-completion/bash_completion
-    [ -f ~/.bash_completion.d/complete_alias ] && source ~/.bash_completion.d/complete_alias
+    [ -f "$HOME/.bash_completion.d/complete_alias" ] && source "$HOME/.bash_completion.d/complete_alias"
 }
 
 init-c8y () {
@@ -36,7 +36,7 @@ init-c8y () {
 
                 if [ ! -f "$ZSH_CUSTOM/plugins/c8y/_c8y" ]; then
                     c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
-                    echo -e "${green}Updated c8y completions. \n\n${bold}Please load your zsh profile again using 'source ~/.zshrc'${normal}"
+                    echo -e "${green}Updated c8y completions. \n\n${bold}Please load your zsh profile again using 'source \$HOME/.zshrc'${normal}"
                 fi
             fi
         fi
@@ -112,8 +112,8 @@ set-c8ymode-qual () { set-c8ymode qual; }
 set-c8ymode-prod () { set-c8ymode prod; }
 
 update-c8y () {
-    git -C "~/.go-c8y-cli" pull > /dev/null
-    ~/.go-c8y-cli/install.sh
+    git -C "$HOME/.go-c8y-cli" pull > /dev/null
+    "$HOME/.go-c8y-cli/install.sh"
 }
 
 ########################################################################

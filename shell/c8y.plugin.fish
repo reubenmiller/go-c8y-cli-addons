@@ -81,8 +81,8 @@ function set-c8ymode-prod --description "Enable prod mode (POST/PUT/DELETE disab
 end
 
 function update-c8y
-    git -C "~/.go-c8y-cli" pull > /dev/null
-    ~/.go-c8y-cli/install.sh
+    git -C "$HOME/.go-c8y-cli" pull > /dev/null
+    "$HOME/.go-c8y-cli/install.sh"
 end
 
 ########################################################################

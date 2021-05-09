@@ -7,11 +7,11 @@
 #   curl https://github.com/reubenmiller/go-c8y-cli/releases/download/v2.0.0/install.sh | sudo bash
 #
 # From github
-#   git clone https://github.com/reubenmiller/go-c8y-cli-addons.git ~/.go-c8y-cli
-#   sudo -E ~/.go-c8y-cli/shell/install.sh
+#   git clone https://github.com/reubenmiller/go-c8y-cli-addons.git "$HOME/.go-c8y-cli"
+#   sudo -E "$HOME/.go-c8y-cli/shell/install.sh"
 #
 #   # Or force downloading of the binary for another OS and architecture
-#   sudo -E PLATFORM_TUPLE=windows_amd64 ~/.go-c8y-cli/shell/install.sh
+#   sudo -E PLATFORM_TUPLE=windows_amd64 "$HOME/.go-c8y-cli/shell/install.sh"
 #
 # All downloads occur over HTTPS from the Github releases page.
 
@@ -90,7 +90,7 @@ set_install_path() {
   fi
   uid=`id -u`
   if [ "$uid" != 0 ]; then
-    INSTALL_PATH=~/bin
+    INSTALL_PATH="$HOME/bin"
   else
     INSTALL_PATH=/usr/local/bin
   fi
@@ -269,29 +269,29 @@ install_profile_fish () {
     return
   fi
 
-  local profile=~/.config/fish/config.fish
+  local profile="$HOME/.config/fish/config.fish"
 
   echo "adding fish plugin"
-  mkdir -p ~/.config/fish/
+  mkdir -p "$HOME/.config/fish/"
   if [[ ! -f "$profile" ]]; then
     touch $profile
 
     if [[ -n "$SUDO_USER" ]]; then
-      chown -R $SUDO_USER ~/.config/fish/
+      chown -R $SUDO_USER "$HOME/.config/fish/"
     fi
   fi
 
   local plugin_name=c8y.plugin.fish
 
-  if [ -d ~/.cumulocity ]; then
+  if [ -d "$HOME/.cumulocity" ]; then
     if ! grep -q "C8Y_SESSION_HOME" "$profile"; then
       echo "adding C8Y_SESSION_HOME variable to $profile"
-      echo 'set -gx C8Y_SESSION_HOME ~/.cumulocity' >> "$profile"
+      echo 'set -gx C8Y_SESSION_HOME "$HOME/.cumulocity"' >> "$profile"
     fi
   fi
 
   if ! grep -q "$plugin_name" "$profile"; then
-    echo 'source ~/.go-c8y-cli/shell/'"$plugin_name" >> ~/.config/fish/config.fish
+    echo 'source "$HOME/.go-c8y-cli/shell/'"$plugin_name\"" >> "$HOME/.config/fish/config.fish"
   fi
 }
 
@@ -300,12 +300,12 @@ install_profile_zsh () {
     return
   fi
 
-  local profile=~/.zshrc
+  local profile="$HOME/.zshrc"
   local plugin_name=c8y.plugin.zsh
 
-  if [[ ! -d ~/.oh-my-zsh ]]; then
+  if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
     # TODO: Handle vanilla zsh (without oh-my-zsh)
-    local custom_completion=~/.go-c8y-cli/completions-zsh
+    local custom_completion="$HOME/.go-c8y-cli/completions-zsh"
 
     if [[ ! -d "$custom_completion" ]]; then
       mkdir -p "$custom_completion"
@@ -333,13 +333,13 @@ install_profile_zsh () {
       echo "fpath=($custom_completion \$fpath)" >> "$profile"
       
       echo "autoload -U compinit; compinit" >> "$profile"      
-      echo 'source ~/.go-c8y-cli/shell/'"$plugin_name" >> "$profile"
+      echo 'source "$HOME/.go-c8y-cli/shell/'"$plugin_name\"" >> "$profile"
     fi
 
-    if [ -d ~/.cumulocity ]; then
+    if [ -d "$HOME/.cumulocity" ]; then
       if ! grep -q "C8Y_SESSION_HOME" "$profile"; then
         echo "adding C8Y_SESSION_HOME variable to $profile"
-        echo 'export C8Y_SESSION_HOME=~/.cumulocity' >> "$profile"
+        echo 'export C8Y_SESSION_HOME="$HOME/.cumulocity"' >> "$profile"
       fi
     fi
 
@@ -348,17 +348,17 @@ install_profile_zsh () {
   
   echo "adding zsh plugin"
 
-  if [ -d ~/.cumulocity ]; then
+  if [ -d "$HOME/.cumulocity" ]; then
     if ! grep -q "C8Y_SESSION_HOME" "$profile"; then
       echo "adding C8Y_SESSION_HOME variable to $profile"
-      echo 'export C8Y_SESSION_HOME=~/.cumulocity' >> "$profile"
+      echo 'export C8Y_SESSION_HOME="$HOME/.cumulocity"' >> "$profile"
     fi
   fi
 
-  mkdir -p ~/.oh-my-zsh/custom/plugins/c8y/
-  cp "$SCRIPT_DIR/shell/c8y.plugin.zsh" ~/.oh-my-zsh/custom/plugins/c8y/
+  mkdir -p "$HOME/.oh-my-zsh/custom/plugins/c8y/"
+  cp "$SCRIPT_DIR/shell/c8y.plugin.zsh" "$HOME/.oh-my-zsh/custom/plugins/c8y/"
   if [[ -n "$SUDO_USER" ]]; then
-    chown -R $SUDO_USER ~/.oh-my-zsh/custom/plugins/c8y/
+    chown -R $SUDO_USER "$HOME/.oh-my-zsh/custom/plugins/c8y/"
   fi
 
   if ! grep -q "c8y" "$profile"; then
@@ -367,19 +367,19 @@ install_profile_zsh () {
 }
 
 install_profile_bash () {
-  local profile=~/.bashrc
+  local profile="$HOME/.bashrc"
   local plugin_name=c8y.plugin.sh
 
   echo "adding bash plugin"
-  if [ -d ~/.cumulocity ]; then
+  if [ -d "$HOME/.cumulocity" ]; then
     if ! grep -q "C8Y_SESSION_HOME" "$profile"; then
       echo "adding C8Y_SESSION_HOME variable to $profile"
-      echo 'export C8Y_SESSION_HOME=~/.cumulocity' >> "$profile"
+      echo 'export C8Y_SESSION_HOME="$HOME/.cumulocity"' >> "$profile"
     fi
   fi
 
   if ! grep -q $plugin_name $profile; then
-    echo 'source ~/.go-c8y-cli/shell/'"$plugin_name" >> "$profile"
+    echo 'source "$HOME/.go-c8y-cli/shell/'"$plugin_name\"" >> "$profile"
   fi
 }
 
