@@ -90,7 +90,7 @@ set-c8ymode-qual () { set-c8ymode qual; }
 set-c8ymode-prod () { set-c8ymode prod; }
 
 update-c8y () {
-    git -C "$HOME/.go-c8y-cli" pull > /dev/null
+    git -C "$HOME/.go-c8y-cli" pull --ff-only > /dev/null
     "$HOME/.go-c8y-cli/install.sh"
 }
 
