@@ -105,7 +105,7 @@ Function set-c8ymode-prod () { set-c8ymode prod; }
 
 Function update-c8y () {
     $UserHome = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath("~")
-    git -C "$UserHome/.go-c8y-cli" pull > $null
+    git -C "$UserHome/.go-c8y-cli" pull --ff-only > $null
     & "$UserHome/.go-c8y-cli/install.ps1"
 }
 
