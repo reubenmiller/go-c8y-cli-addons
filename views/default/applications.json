@@ -39,6 +39,21 @@
                 "name",
                 "password"
             ]
+        },
+        {
+            "name": "microserviceStatus",
+            "priority": 500,
+            "self": "inventory",
+            "type": "c8y_Application_\\d+",
+            "columns": [
+                "id",
+                "name",
+                "type",
+                "c8y_ActiveAlarmsStatus.major",
+                "cpu:c8y_Status.details.*.cpu",
+                "memory:c8y_Status.details.*.memory",
+                "c8y_Subscriptions.*.status"
+            ]
         }
     ]
 }
