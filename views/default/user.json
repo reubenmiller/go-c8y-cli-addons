@@ -26,6 +26,15 @@
                 "shouldResetPassword",
                 "customProperties.*"
             ]
+        },
+        {
+            "name": "userReference",
+            "priority": 400,
+            "contentType": "vnd.com.nsn.cumulocity.userreference\\+json",
+            "columns": [
+                "self",
+                "user.userName"
+            ]
         }
     ]
 }
