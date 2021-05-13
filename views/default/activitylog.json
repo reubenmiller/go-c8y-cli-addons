@@ -2,7 +2,7 @@
     "version": "1",
     "definitions": [
         {
-            "name": "activitylogEntry",
+            "name": "activitylogRequest",
             "priority": 500,
             "fragments": [
                 "ctx",
@@ -21,7 +21,7 @@
             ]
         },
         {
-            "name": "activitylogEntry",
+            "name": "activitylogCommand",
             "priority": 500,
             "fragments": [
                 "ctx",
