@@ -48,7 +48,7 @@ PLATFORM_TUPLE=${PLATFORM_TUPLE:-}
 
 error() {
   if [ $# != 0 ]; then
-    echo -e "\e[0;31m""$@""\e[0m" >&2
+    echo -e "\033[0;31m""$@""\033[0m" >&2
   fi
 }
 
@@ -154,10 +154,10 @@ get_os () {
 }
 
 install_binary () {
-  bold="\e[1m"
-  normal="\e[0m"
-  red="\e[31m"
-  green="\e[32m"
+  bold="\033[1m"
+  normal="\033[0m"
+  red="\033[31m"
+  green="\033[32m"
 
   VERSION=${1:-latest}
 
