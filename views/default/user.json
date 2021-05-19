@@ -35,6 +35,16 @@
                 "self",
                 "user.userName"
             ]
+        },
+        {
+            "name": "userReferenceCollection",
+            "priority": 400,
+            "contentType": "vnd.com.nsn.cumulocity.userreferencecollection\\+json",
+            "columns": [
+                "self",
+                "userName",
+                "email"
+            ]
         }
     ]
 }
