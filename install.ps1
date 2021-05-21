@@ -303,6 +303,8 @@ Function Add-ToProfile {
         if (-Not (Select-String -Path $profile -Pattern "C8Y_SESSION_HOME" -Quiet)) {
             Write-Verbose "Adding detected .cumulocity session home to profile"
             Add-Content -Path $PROFILE -Value "`$env:C8Y_SESSION_HOME = '$CustomSessionHome'`n"
+            # Also set it now so it is available now
+            $env:C8Y_SESSION_HOME = "$CustomSessionHome"
         }
     }
     
