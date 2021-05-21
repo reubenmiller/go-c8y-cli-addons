@@ -310,7 +310,7 @@ Function Add-ToProfile {
         $PathStatement,
         ". `"$UserHome/.go-c8y-cli/shell/c8y.plugin.ps1`""
     )
-    if (-Not (Select-String -Path $PROFILE -SimpleMatch -Pattern $ImportSnippet[1] -Quiet)) {
+    if (-Not (Select-String -Path $PROFILE -SimpleMatch -Pattern "c8y.plugin.ps1" -Quiet)) {
         Write-Verbose "Adding imports to profile"
         Add-Content -Path $PROFILE -Value (($ImportSnippet -join "`n") + "`n")
     }
