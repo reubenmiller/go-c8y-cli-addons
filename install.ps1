@@ -297,12 +297,21 @@ Function Add-ToProfile {
     } else {
         "`$env:PATH = `"${InstallPath};`$env:PATH`""
     }
+
+    $ImportSnippet = New-Object System.Collections.ArrayList
+
+    $CustomSessionHome = Join-Path $UserHome -ChildPath ".cumulocity"
+    if (Test-Path $CustomSessionHome) {
+        if (-Not (Select-String -Path $profile -Pattern "C8Y_SESSION_HOME" -Quiet)) {
+            [void] $ImportSnippet.Add("`$env:C8Y_SESSION_HOME = '$CustomSessionHome'")
+        }
+    }
     
-    $ImportSnippet = @(
+    [void] $ImportSnippet.AddRange(@(
         $PathStatement,
         ". $UserHome/.go-c8y-cli/shell/c8y.plugin.ps1"
-    )
-    if (-Not (Select-String -Path $PROFILE -SimpleMatch -Pattern $ImportSnippet[1] -Quiet)) {
+    ))
+    if (-Not (Select-String -Path $PROFILE -SimpleMatch -Pattern $ImportSnippet[-1] -Quiet)) {
         Write-Verbose "Adding imports to profile"
         Add-Content -Path $PROFILE -Value ($ImportSnippet -join "`n")
     }
