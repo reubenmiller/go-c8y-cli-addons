@@ -2,7 +2,7 @@
 [cmdletbinding()]
 Param(
     # installation path
-    [string] $InstallPath = "~/c8ytest/bin",
+    [string] $InstallPath = "~/bin",
 
     # go-c8y-cli version to install
     [string] $Version = "latest",
