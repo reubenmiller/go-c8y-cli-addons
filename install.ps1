@@ -298,22 +298,21 @@ Function Add-ToProfile {
         "`$env:PATH = `"${InstallPath};`$env:PATH`""
     }
 
-    $ImportSnippet = New-Object System.Collections.ArrayList
-
     $CustomSessionHome = Join-Path $UserHome -ChildPath ".cumulocity"
     if (Test-Path $CustomSessionHome) {
         if (-Not (Select-String -Path $profile -Pattern "C8Y_SESSION_HOME" -Quiet)) {
-            [void] $ImportSnippet.Add("`$env:C8Y_SESSION_HOME = '$CustomSessionHome'")
+            Write-Verbose "Adding detected .cumulocity session home to profile"
+            Add-Content -Path $PROFILE -Value "`$env:C8Y_SESSION_HOME = '$CustomSessionHome'`n"
         }
     }
     
-    [void] $ImportSnippet.AddRange(@(
+    $ImportSnippet = @(
         $PathStatement,
-        ". $UserHome/.go-c8y-cli/shell/c8y.plugin.ps1"
-    ))
-    if (-Not (Select-String -Path $PROFILE -SimpleMatch -Pattern $ImportSnippet[-1] -Quiet)) {
+        ". `"$UserHome/.go-c8y-cli/shell/c8y.plugin.ps1`""
+    )
+    if (-Not (Select-String -Path $PROFILE -SimpleMatch -Pattern $ImportSnippet[1] -Quiet)) {
         Write-Verbose "Adding imports to profile"
-        Add-Content -Path $PROFILE -Value ($ImportSnippet -join "`n")
+        Add-Content -Path $PROFILE -Value (($ImportSnippet -join "`n") + "`n")
     }
 
     # Importing script (for immediate usage)
