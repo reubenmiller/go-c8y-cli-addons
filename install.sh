@@ -349,7 +349,7 @@ install_profile_zsh () {
 
     # source profile again, to prevent user having to start a new session
     if [[ -n "$ZSH" ]]; then
-      source "$profile"
+      echo "You will need to reload your zsh completion if the tab-completion does not work"
     fi
     return
   fi
@@ -379,7 +379,7 @@ install_profile_zsh () {
 
   # source profile again, to prevent user having to start a new session
   if [[ -n "$ZSH" ]]; then
-    source "$profile"
+    echo "You will need to reload your zsh completion if the tab-completion does not work"
   fi
 }
 
