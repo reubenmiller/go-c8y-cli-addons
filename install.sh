@@ -349,7 +349,9 @@ install_profile_zsh () {
 
     # source profile again, to prevent user having to start a new session
     if [[ -n "$ZSH" ]]; then
-      echo "You will need to reload your zsh completion if the tab-completion does not work"
+      if ! grep -q "_c8y" "$HOME/.zcompdump"; then
+        echo "You will need to reload your zsh completion if the tab-completion does not work"
+      fi
     fi
     return
   fi
@@ -379,7 +381,9 @@ install_profile_zsh () {
 
   # source profile again, to prevent user having to start a new session
   if [[ -n "$ZSH" ]]; then
-    echo "You will need to reload your zsh completion if the tab-completion does not work"
+    if ! grep -q "_c8y" "$HOME/.zcompdump"; then
+      echo "You will need to reload your zsh completion if the tab-completion does not work"
+    fi
   fi
 }
 
