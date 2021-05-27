@@ -36,7 +36,8 @@ init-c8y () {
 
                 if [ ! -f "$ZSH_CUSTOM/plugins/c8y/_c8y" ]; then
                     c8y completion zsh > "$ZSH_CUSTOM/plugins/c8y/_c8y"
-                    echo -e "${green}Updated c8y completions. \n\n${bold}Please load your zsh profile again using 'source \$HOME/.zshrc'${normal}"
+                    echo -e "${green}Updated c8y completions${normal}"
+                    source "$HOME/.zshrc"
                 fi
             fi
         fi
