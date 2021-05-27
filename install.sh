@@ -293,10 +293,6 @@ install_profile_fish () {
   if ! grep -q "$plugin_name" "$profile"; then
     echo 'source "$HOME/.go-c8y-cli/shell/'"$plugin_name\"" >> "$HOME/.config/fish/config.fish"
   fi
-
-  if [[ -n "$FISH_VERSION" ]]; then
-    source "$profile"
-  fi
 }
 
 install_profile_zsh () {
