@@ -343,10 +343,6 @@ install_profile_zsh () {
       fi
     fi
 
-    # source profile again, to prevent user having to start a new session
-    if [[ -n "$ZSH" ]]; then
-      echo -e "\nNote: If tab-completion is not working, please reload your console\n\n"
-    fi
     return
   fi
   
@@ -371,11 +367,6 @@ install_profile_zsh () {
 
   if ! grep -q "c8y" "$profile"; then
     sed -iE 's/^plugins=(\(.*\))/plugins=(\1 c8y)/' $profile
-  fi
-
-  # source profile again, to prevent user having to start a new session
-  if [[ -n "$ZSH" ]]; then
-    echo -e "\nNote: If tab-completion is not working, please reload your console\n\n"
   fi
 }
 
@@ -419,6 +410,9 @@ install_binary
 install_profile_bash
 install_profile_zsh
 install_profile_fish
+
+# source profile again, to prevent user having to start a new session
+echo -e "\nNote: If tab-completion is not working, please reload your console\n\n"
 
 }
 
