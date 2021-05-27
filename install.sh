@@ -293,6 +293,10 @@ install_profile_fish () {
   if ! grep -q "$plugin_name" "$profile"; then
     echo 'source "$HOME/.go-c8y-cli/shell/'"$plugin_name\"" >> "$HOME/.config/fish/config.fish"
   fi
+
+  if [[ -n "$FISH_VERSION" ]]; then
+    source "$profile"
+  fi
 }
 
 install_profile_zsh () {
@@ -343,6 +347,10 @@ install_profile_zsh () {
       fi
     fi
 
+    # source profile again, to prevent user having to start a new session
+    if [[ -n "$ZSH" ]]; then
+      source "$profile"
+    fi
     return
   fi
   
@@ -355,6 +363,10 @@ install_profile_zsh () {
     fi
   fi
 
+  if ! grep -q "autoload -U compinit; compinit" "$profile"; then
+    echo 'autoload -U compinit; compinit' >> "$profile"
+  fi
+
   mkdir -p "$HOME/.oh-my-zsh/custom/plugins/c8y/"
   cp "$SCRIPT_DIR/shell/c8y.plugin.zsh" "$HOME/.oh-my-zsh/custom/plugins/c8y/"
   if [[ -n "$SUDO_USER" ]]; then
@@ -363,6 +375,11 @@ install_profile_zsh () {
 
   if ! grep -q "c8y" "$profile"; then
     sed -iE 's/^plugins=(\(.*\))/plugins=(\1 c8y)/' $profile
+  fi
+
+  # source profile again, to prevent user having to start a new session
+  if [[ -n "$ZSH" ]]; then
+    source "$profile"
   fi
 }
 
@@ -380,6 +397,11 @@ install_profile_bash () {
 
   if ! grep -q $plugin_name $profile; then
     echo 'source "$HOME/.go-c8y-cli/shell/'"$plugin_name\"" >> "$profile"
+  fi
+
+  # source profile again, to prevent user having to start a new session
+  if [[ -n "$BASH" ]]; then
+    source "$profile"
   fi
 }
 
