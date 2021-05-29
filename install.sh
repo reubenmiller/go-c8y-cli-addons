@@ -11,7 +11,7 @@
 #   sudo -E "$HOME/.go-c8y-cli/shell/install.sh"
 #
 #   # Or force downloading of the binary for another OS and architecture
-#   sudo -E PLATFORM_TUPLE=windows_amd64 "$HOME/.go-c8y-cli/shell/install.sh"
+#   sudo -E "$HOME/.go-c8y-cli/shell/install.sh" --platform windows_amd64
 #
 # All downloads occur over HTTPS from the Github releases page.
 
@@ -32,19 +32,16 @@ CURL_AUTH_HEADER=
 GITHUB_TOKEN=${GITHUB_TOKEN:-}
 INSTALL_PATH=${INSTALL_PATH:-}
 SUDO_USER=${SUDO_USER:-}
-SCRIPT_DIR=$( dirname "$0" )
-
-if [[ "$GITHUB_TOKEN" != "" ]]; then
-  CURL_AUTH_HEADER="Authorization: Bearer $GITHUB_TOKEN"
-fi
-
-CURL_USER_AGENT=${CURL_USER_AGENT:-go-c8y-cli-installer}
-
+SKIP_PROFILE="false"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+GO_C8Y_CLI_SOURCE="$SCRIPT_DIR"
+FORCE_INSTALL="false"
 OS=
 ARCH=
 WORK_DIR=
-
 PLATFORM_TUPLE=${PLATFORM_TUPLE:-}
+
+###################################
 
 error() {
   if [ $# != 0 ]; then
@@ -61,6 +58,94 @@ fail() {
   echo "" >&2
   exit 1
 }
+
+show_help () {
+  exit_code=${1:-"0"}
+  echo ""
+  echo "Install Unofficial Cumulocity cli tool (go-c8y-cli)"
+  echo ""
+  echo "    $0 [flags]"
+  echo ""
+  echo "Flags:"
+  echo -e "    --install <path>       Use custom install location. Defaults to \$HOME/bin for non-sudo users and /usr/local/bin for sudo users"
+  echo -e "    --version <version>    Install a specific version. Defaults to 'latest'"
+  echo -e "    --noprofile            Don't modify shell profiles"
+  echo -e " -p --platform <os_arch>   Manually set the binary version to install for OS and CPU architecture. i.e. windows_amd64, macOS_amd64, linux_armv5"
+  echo -e " -f --force                Force installation, and disable the check for older v1 releases"
+  echo -e " -h --help                 Show this help"
+  echo ""
+  echo "Examples:"
+  echo ""
+  echo -e "    Install the binary to a custom location"
+  echo -e "    \$ $0 --install /usr/local/bin"
+  echo ""
+  echo -e "    Install the binary but don't touch any shell profiles"
+  echo -e "    \$ $0 --noprofile"
+  echo ""
+  exit $exit_code
+}
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    --install)
+    INSTALL_PATH="$2"
+    shift
+    shift
+    ;;
+    --token)
+    GITHUB_TOKEN="$2"
+    shift
+    shift
+    ;;
+    -p|--platform)
+    PLATFORM_TUPLE="$2"
+    shift
+    shift
+    ;;
+    --version)
+    GO_C8Y_CLI_VERSION="$2"
+    shift
+    shift
+    ;;
+    --noprofile)
+    SKIP_PROFILE="true"
+    shift
+    ;;
+    -f|--force)
+    FORCE_INSTALL="true"
+    shift
+    ;;
+    -h|--help)
+    show_help
+    shift
+    shift
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+if [[ "$#" -gt 1 ]]; then
+  shift
+  error "\nInvalid flags: $@"
+  show_help 1
+fi
+
+###################################
+
+if [[ "$GITHUB_TOKEN" != "" ]]; then
+  CURL_AUTH_HEADER="Authorization: Bearer $GITHUB_TOKEN"
+fi
+
+CURL_USER_AGENT=${CURL_USER_AGENT:-go-c8y-cli-installer}
+
 
 detect_platform() {
   if [[ "$PLATFORM_TUPLE" != "" ]]; then
@@ -88,6 +173,13 @@ set_install_path() {
   if [[ -n "$INSTALL_PATH" ]]; then
     return
   fi
+
+  # Use existing path if it is already installed
+  if [[ $(command -v c8y) ]]; then
+    INSTALL_PATH="$( dirname "$(command -v c8y)" )"
+    return
+  fi
+
   uid=`id -u`
   if [ "$uid" != 0 ]; then
     INSTALL_PATH="$HOME/bin"
@@ -291,7 +383,7 @@ install_profile_fish () {
   fi
 
   if ! grep -q "$plugin_name" "$profile"; then
-    echo 'source "$HOME/.go-c8y-cli/shell/'"$plugin_name\"" >> "$HOME/.config/fish/config.fish"
+    echo "source \"$SCRIPT_DIR/shell/$plugin_name\"" >> "$HOME/.config/fish/config.fish"
   fi
 }
 
@@ -305,7 +397,7 @@ install_profile_zsh () {
 
   if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
     # TODO: Handle vanilla zsh (without oh-my-zsh)
-    local custom_completion="$HOME/.go-c8y-cli/completions-zsh"
+    local custom_completion="$GO_C8Y_CLI_SOURCE/completions-zsh"
 
     if [[ ! -d "$custom_completion" ]]; then
       mkdir -p "$custom_completion"
@@ -333,7 +425,7 @@ install_profile_zsh () {
       echo "fpath=($custom_completion \$fpath)" >> "$profile"
       
       echo "autoload -U compinit; compinit" >> "$profile"      
-      echo 'source "$HOME/.go-c8y-cli/shell/'"$plugin_name\"" >> "$profile"
+      echo "source \"$GO_C8Y_CLI_SOURCE/shell/$plugin_name\"" >> "$profile"
     fi
 
     if [ -d "$HOME/.cumulocity" ]; then
@@ -383,7 +475,7 @@ install_profile_bash () {
   fi
 
   if ! grep -q $plugin_name $profile; then
-    echo 'source "$HOME/.go-c8y-cli/shell/'"$plugin_name\"" >> "$profile"
+    echo "source \"$GO_C8Y_CLI_SOURCE/shell/$plugin_name\"" >> "$profile"
   fi
 
   # source profile again, to prevent user having to start a new session
@@ -393,11 +485,16 @@ install_profile_bash () {
 }
 
 assert_no_old_version () {
+  # ignore this check if force is being used
+  if [[ "$FORCE_INSTALL" == "true" ]]; then
+    return
+  fi
+
   if [[ -n $(command -v c8y) ]]; then
 
     if ! c8y version --select version --output csv 2> /dev/null > /dev/null; then
       c8y_path=$( which c8y )
-      fail "E_INVALID_V1_VERSION" "an old version of c8y go-c8y-cli was detected. path=$c8y_path; please remove it and try again."
+      fail "E_INVALID_V1_VERSION" "an old version of c8y go-c8y-cli was detected. path=$c8y_path; please remove it and try again, or use --force"
     fi
   fi
 }
@@ -407,12 +504,15 @@ assert_dependencies
 set_install_path
 assert_no_old_version
 install_binary
-install_profile_bash
-install_profile_zsh
-install_profile_fish
 
-# source profile again, to prevent user having to start a new session
-echo -e "\nNote: If tab-completion is not working, please reload your console\n\n"
+if [[ "$SKIP_PROFILE" == "false" ]]; then
+  install_profile_bash
+  install_profile_zsh
+  install_profile_fish
+
+  # source profile again, to prevent user having to start a new session
+  echo -e "\nNote: If tab-completion is not working, please reload your console\n\n"
+fi
 
 }
 
