@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/reubenmiller/go-c8y-cli/master/tools/schema/session.schema.json
 settings:
   activitylog:
-    path: "$C8Y_HOME/activityLog"
+    path: "~/.cumulocity/activitylog"
     enabled: true
   session:
     defaultUsername: ''
