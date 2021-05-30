@@ -30,6 +30,8 @@ install_bash_dependencies () {
 init-c8y () {
     if [[ $(command -v c8y) ]]; then
         if [ "$C8Y_SHELL" = "zsh" ]; then
+            # init completions
+            autoload -U compinit; compinit
 
             if [[ -n "$ZSH_CUSTOM" ]]; then
                 mkdir -p "$ZSH_CUSTOM/plugins/c8y"
