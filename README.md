@@ -1,6 +1,13 @@
 ## Notice
 
-WIP - Work in Progress
+This repository is meant to compliment the [go-c8y-cli](https://github.com/reubenmiller/go-c8y-cli) project by providing the following:
+
+* Installation script
+* Default views
+* Template (jsonnet) examples
+* Shell profile helpers (i.e. `set-session`)
+
+Please see the [documentation](https://goc8ycli.netlify.app/docs/installation/shell-installation) for more information.
 
 ## Getting started
 
