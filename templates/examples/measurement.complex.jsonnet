@@ -1,4 +1,4 @@
-local mType = var("type", "c8y_Temparature");
+local mType = var("type", "c8y_Weather");
 
 {
     type: mType,
