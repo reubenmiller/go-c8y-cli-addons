@@ -12,6 +12,7 @@ settings:
   views:
     commonPaths:
     - "$C8Y_HOME/views/default"
+    - "~/.config/c8y/views"
     columnMinWidth: 5
     columnMaxWidth: 80
     columnPadding: 5
