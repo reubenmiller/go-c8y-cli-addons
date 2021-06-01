@@ -9,10 +9,11 @@ settings:
   defaults: {}
   template:
     path: "$C8Y_HOME/templates"
+    customPaths: "~/.config/c8y/templates"
   views:
     commonPaths:
-    - "$C8Y_HOME/views/default"
-    - "~/.config/c8y/views"
+    - "$C8Y_HOME/views"
+    customPaths: "~/.config/c8y/views"
     columnMinWidth: 5
     columnMaxWidth: 80
     columnPadding: 5
