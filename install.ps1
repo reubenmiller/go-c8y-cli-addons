@@ -38,9 +38,9 @@ Install go-c8y-cli and addons to a shared location accessible by multiple users
 Force re-installation of go-c8y-cli and addons to a shared location. go-c8y-cli will be installed again even the binary already exists.
 
 .EXAMPLE
-./install.ps1 -InstallPath C:\tools\cumulocity -UserHome C:\tools\cumulocity -SkipVersionCheck -ProfilePath $PROFILE.AllUsersCurrentHost
+powershell -executionPolicy bypass C:\Users\myuser\.go-c8y-cli\install.ps1 -InstallPath C:\tools\cumulocity -UserHome C:\tools\cumulocity -SkipVersionCheck -ProfilePath $PROFILE.AllUsersAllHosts
 
-Install/re-install go-c8y-cli and edit the global powershell profile for all users
+Install/re-install go-c8y-cli and edit the global powershell profile for all users. This needs to be run as admin (and use a full path to the install.ps1 script)
 #>
 
 $UserHome = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($UserHome)
