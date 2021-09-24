@@ -4,7 +4,7 @@
         {
             "name": "tenantStatistics",
             "priority": 500,
-            "contentType": "vnd.com.nsn.cumulocity.tenantUsageStatisticsSummary",
+            "contentType": "vnd.com.nsn.cumulocity.tenantUsageStatisticsSummary\\+json",
             "columns": [
                 "day",
                 "storageSize",
