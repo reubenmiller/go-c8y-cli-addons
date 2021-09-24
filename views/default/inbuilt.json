@@ -20,6 +20,27 @@
                 "!lastUpdated",
                 "!self"
             ]
+        },
+        {
+            "name": "ignoreinbuilt_id",
+            "priority": 900,
+            "type": "dummyvalue",
+            "columns": [
+                "**",
+                "!id",
+                "!firstOccurrenceTime",
+                "!count",
+                "!history.**",
+                "!additionParents.**",
+                "!assetParents.**",
+                "!childAdditions.**",
+                "!childAssets.**",
+                "!childDevices.**",
+                "!deviceParents.**",
+                "!creationTime",
+                "!lastUpdated",
+                "!self"
+            ]
         }
     ]
 }
