@@ -1,0 +1,45 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "firmware",
+            "priority": 400,
+            "type": "c8y_Firmware",
+            "columns": [
+                "id",
+                "name",
+                "c8y_Filter",
+                "lastUpdated",
+                "description"
+            ]
+        },
+        {
+            "name": "firmwarePatch",
+            "priority": 350,
+            "type": "c8y_FirmwareBinary",
+            "fragments": [
+                "c8y_Patch"
+            ],
+            "columns": [
+                "id",
+                "firmwareName:additionParents.references.0.managedObject.name",
+                "c8y_Patch.dependency",
+                "c8y_Firmware.version",
+                "lastUpdated",
+                "c8y_Firmware.url"
+            ]
+        },
+        {
+            "name": "firmwareBinary",
+            "priority": 360,
+            "type": "c8y_FirmwareBinary",
+            "columns": [
+                "id",
+                "firmwareName:additionParents.references.0.managedObject.name",
+                "c8y_Firmware.version",
+                "lastUpdated",
+                "c8y_Firmware.url"
+            ]
+        }
+    ]
+}

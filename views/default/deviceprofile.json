@@ -1,0 +1,17 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "deviceprofile",
+            "priority": 400,
+            "type": "c8y_Profile",
+            "columns": [
+                "id",
+                "name",
+                "c8y_Filter",
+                "lastUpdated",
+                "c8y_DeviceProfile"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,19 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "configuration",
+            "priority": 400,
+            "type": "c8y_ConfigurationDump",
+            "columns": [
+                "id",
+                "name",
+                "configurationType",
+                "deviceType",
+                "lastUpdated",
+                "url",
+                "description"
+            ]
+        }
+    ]
+}
