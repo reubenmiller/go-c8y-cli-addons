@@ -4,14 +4,46 @@ Param(
     # installation path
     [string] $InstallPath = "~/bin",
 
+    # User home folder, where the go-c8y-cli-addons will be installed
+    [string] $UserHome = "~",
+
     # go-c8y-cli version to install
     [string] $Version = "latest",
+
+    # Path to profile which should be edited to add the custom location to it
+    [string] $ProfilePath = $PROFILE,
 
     # Skip the version check even if c8y is already installed
     [switch] $SkipVersionCheck
 )
+<# 
+.EXAMPLE
+./install.ps1
 
-$UserHome = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath("~")
+Install go-c8y-cli in the default location. Only install if the current version does not match the latest
+
+.EXAMPLE
+./install.ps1 -SkipVersionCheck
+
+Install go-c8y-cli in the default location and ignore any version checking (even if you already have the latest version, it will still be downloaded again)
+
+.EXAMPLE
+./install.ps1 -InstallPath /opt/tools/cumulocity -UserHome /opt/tools/cumulocity -SkipVersionCheck
+
+Install go-c8y-cli and addons to a shared location accessible by multiple users
+
+.EXAMPLE
+./install.ps1 -InstallPath C:\tools\cumulocity -UserHome C:\tools\cumulocity -SkipVersionCheck
+
+Force re-installation of go-c8y-cli and addons to a shared location. go-c8y-cli will be installed again even the binary already exists.
+
+.EXAMPLE
+powershell -executionPolicy bypass C:\Users\myuser\.go-c8y-cli\install.ps1 -InstallPath C:\tools\cumulocity -UserHome C:\tools\cumulocity -SkipVersionCheck -ProfilePath $PROFILE.AllUsersAllHosts
+
+Install/re-install go-c8y-cli and edit the global powershell profile for all users. This needs to be run as admin (and use a full path to the install.ps1 script)
+#>
+
+$UserHome = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($UserHome)
 
 # Expand install path (but it might not yet exist)
 $InstallPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($InstallPath)
@@ -282,14 +314,14 @@ Function Get-LatestTag () {
 Function Add-ToProfile {
     [cmdletbinding()]
     Param()
-    $ProfileDir = Split-Path $PROFILE -Parent
+    $ProfileDir = Split-Path $ProfilePath -Parent
     if ($ProfileDir -and -Not (Test-Path $ProfileDir)) {
         Write-Verbose "Creating powershell profile directory"
         $null = New-Item -Path $ProfileDir -ItemType Directory
     }
     
-    if (-Not (Test-Path $PROFILE)) {
-        "" | Out-File -FilePath $PROFILE
+    if (-Not (Test-Path $ProfilePath)) {
+        "" | Out-File -FilePath $ProfilePath
     }
 
     $PathStatement = if ($IsMacOS -or $IsLinux) {
@@ -300,9 +332,9 @@ Function Add-ToProfile {
 
     $CustomSessionHome = Join-Path $UserHome -ChildPath ".cumulocity"
     if (Test-Path $CustomSessionHome) {
-        if (-Not (Select-String -Path $profile -Pattern "C8Y_SESSION_HOME" -Quiet)) {
+        if (-Not (Select-String -Path $ProfilePath -Pattern "C8Y_SESSION_HOME" -Quiet)) {
             Write-Verbose "Adding detected .cumulocity session home to profile"
-            Add-Content -Path $PROFILE -Value "`$env:C8Y_SESSION_HOME = '$CustomSessionHome'`n"
+            Add-Content -Path $ProfilePath -Value "`$env:C8Y_SESSION_HOME = '$CustomSessionHome'`n"
             # Also set it now so it is available now
             $env:C8Y_SESSION_HOME = "$CustomSessionHome"
         }
@@ -312,9 +344,18 @@ Function Add-ToProfile {
         $PathStatement,
         ". `"$UserHome/.go-c8y-cli/shell/c8y.plugin.ps1`""
     )
-    if (-Not (Select-String -Path $PROFILE -SimpleMatch -Pattern "c8y.plugin.ps1" -Quiet)) {
-        Write-Verbose "Adding imports to profile"
-        Add-Content -Path $PROFILE -Value (($ImportSnippet -join "`n") + "`n")
+    if (-Not (Select-String -Path $ProfilePath -SimpleMatch -Pattern "env:C8Y_HOME" -Quiet)) {
+        $CustomSettings = @(
+            "`$env:C8Y_HOME = `"$UserHome/.go-c8y-cli`"",
+            "`$env:C8Y_SESSION_HOME = `"$UserHome/.cumulocity`""
+        )
+        Write-Host "Adding custom settings to profile: $ProfilePath"
+        Add-Content -Path $ProfilePath -Value (($CustomSettings -join "`n") + "`n")
+    }
+
+    if (-Not (Select-String -Path $ProfilePath -SimpleMatch -Pattern "$UserHome/.go-c8y-cli/shell/c8y.plugin.ps1" -Quiet)) {
+        Write-Host "Adding imports to profile: $ProfilePath"
+        Add-Content -Path $ProfilePath -Value (($ImportSnippet -join "`n") + "`n")
     }
 
     # Importing script (for immediate usage)
