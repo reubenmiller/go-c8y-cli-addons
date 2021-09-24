@@ -32,8 +32,9 @@
         },
         {
             "name": "bootstrapuser",
-            "priority": 510,
-            "contentType": "vnd.com.nsn.cumulocity.user",
+            "priority": 400,
+            "contentType": "vnd.com.nsn.cumulocity.user\\+json",
+            "fragments": ["tenant", "name", "password"],
             "columns": [
                 "tenant",
                 "name",
