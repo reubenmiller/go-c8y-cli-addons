@@ -4,7 +4,7 @@
         {
             "name": "firmware",
             "priority": 400,
-            "type": "c8y_Firmware",
+            "type": "c8y_Firmware$",
             "columns": [
                 "id",
                 "name",
@@ -16,7 +16,7 @@
         {
             "name": "firmwarePatch",
             "priority": 350,
-            "type": "c8y_FirmwareBinary",
+            "type": "c8y_FirmwareBinary$",
             "fragments": [
                 "c8y_Patch"
             ],
@@ -32,7 +32,7 @@
         {
             "name": "firmwareBinary",
             "priority": 360,
-            "type": "c8y_FirmwareBinary",
+            "type": "c8y_FirmwareBinary$",
             "columns": [
                 "id",
                 "firmwareName:additionParents.references.0.managedObject.name",
