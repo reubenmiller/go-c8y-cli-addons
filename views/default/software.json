@@ -4,7 +4,7 @@
         {
             "name": "software",
             "priority": 401,
-            "type": "c8y_Software",
+            "type": "c8y_Software$",
             "columns": [
                 "id",
                 "name",
@@ -16,7 +16,7 @@
         {
             "name": "softwareVersion",
             "priority": 401,
-            "type": "c8y_SoftwareBinary",
+            "type": "c8y_SoftwareBinary$",
             "columns": [
                 "id",
                 "softwareName:additionParents.references.0.managedObject.name",
