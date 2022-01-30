@@ -4,7 +4,7 @@
         {
             "name": "managedObject",
             "priority": 600,
-            "contentType": "vnd.com.nsn.cumulocity.managedObject",
+            "contentType": "vnd.com.nsn.cumulocity.managedObject\\+json",
             "columns": [
                 "id",
                 "name",

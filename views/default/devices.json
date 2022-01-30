@@ -13,6 +13,17 @@
                 "lastUpdated",
                 "c8y_Availability.status"
             ]
+        },
+        {
+            "name": "deviceUsers",
+            "priority": 500,
+            "contentType": "vnd.com.nsn.cumulocity.managedobjectuser\\+json",
+            "columns": [
+                "userName",
+                "enabled",
+                "customProperties",
+                "self"
+            ]
         }
     ]
 }
