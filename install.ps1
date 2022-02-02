@@ -141,7 +141,7 @@ Function Invoke-DownloadC8yBinary {
 
     if ($DownloadedFile -match ".zip") {
         $tmp = New-TemporaryDirectory
-        Expand-Archive -Path $DownloadedFile -DestinationPath "$tmp/$package"
+        Microsoft.PowerShell.Archive\Expand-Archive -Path $DownloadedFile -DestinationPath "$tmp/$package"
         Write-Host "Installing c8y to $InstallPath"
         Copy-Item "$tmp/$package/bin/c8y*" -Destination "$InstallPath/"
     } else {
