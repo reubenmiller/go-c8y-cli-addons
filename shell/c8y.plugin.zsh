@@ -30,6 +30,13 @@ install_bash_dependencies () {
 init-c8y () {
     if [[ $(command -v c8y) ]]; then
         if [ "$C8Y_SHELL" = "zsh" ]; then
+
+            # homebrew only: Add completions folder to the fpath so zsh can find it
+            if command -v brew &>/dev/null; then
+                FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+                chmod -R go-w "$(brew --prefix)/share"
+            fi
+
             # init completions
             autoload -U compinit; compinit
 
