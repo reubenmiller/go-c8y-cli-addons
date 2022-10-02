@@ -1,0 +1,18 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "subscription",
+            "priority": 500,
+            "contentType": "application/vnd.com.nsn.cumulocity.subscription(collection)?\\+json",
+            "columns": [
+                "id",
+                "subscription",
+                "context",
+                "source.id",
+                "source.name",
+                "subscriptionFilter.apis"
+            ]
+        }
+    ]
+}
