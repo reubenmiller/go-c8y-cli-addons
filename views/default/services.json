@@ -1,0 +1,18 @@
+{
+    "version": "1",
+    "definitions": [
+        {
+            "name": "service",
+            "priority": 450,
+            "type": "c8y_Service",
+            "columns": [
+                "id",
+                "name",
+                "type",
+                "serviceType",
+                "status",
+                "lastUpdated"
+            ]
+        }
+    ]
+}
