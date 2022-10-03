@@ -7,6 +7,7 @@
             "contentType": "collection",
             "fragments": ["statistics.pageSize", "self"],
             "columns": [
+                "totalElements:statistics.totalElements",
                 "totalPages:statistics.totalPages",
                 "pageSize:statistics.pageSize",
                 "currentPage:statistics.currentPage"
@@ -17,6 +18,17 @@
             "priority": 110,
             "fragments": ["statistics.pageSize", "self", "statistics.totalPages"],
             "columns": [
+                "totalPages:statistics.totalPages",
+                "pageSize:statistics.pageSize",
+                "currentPage:statistics.currentPage"
+            ]
+        },
+        {
+            "name": "statisticsSummary",
+            "priority": 109,
+            "fragments": ["statistics.pageSize", "self", "statistics.totalElements"],
+            "columns": [
+                "totalElements:statistics.totalElements",
                 "totalPages:statistics.totalPages",
                 "pageSize:statistics.pageSize",
                 "currentPage:statistics.currentPage"
