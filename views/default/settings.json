@@ -8,6 +8,7 @@
             "columns": [
                 "host",
                 "tenant",
+                "version",
                 "username",
                 "path"
             ]
