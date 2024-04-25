@@ -55,6 +55,21 @@
                 "memory:c8y_Status.details.*.memory",
                 "c8y_Subscriptions.*.status"
             ]
+        },
+        {
+            "name": "uiPlugin",
+            "priority": 380,
+            "self": "application",
+            "type": "HOSTED",
+            "fragments": ["applicationVersions"],
+            "columns": [
+                "id",
+                "name",
+                "manifest.version",
+                "availability",
+                "manifest.description",
+                "manifest.author"
+            ]
         }
     ]
 }
