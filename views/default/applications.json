@@ -70,6 +70,20 @@
                 "manifest.description",
                 "manifest.author"
             ]
+        },
+        {
+            "name": "uiPluginReference",
+            "priority": 380,
+            "fragments": ["plugin.applicationVersions", "plugin.manifest"],
+            "columns": [
+                "id",
+                "name",
+                "version",
+                "plugin.contextPath",
+                "plugin.availability",
+                "plugin.manifest.description",
+                "plugin.manifest.author"
+            ]
         }
     ]
 }
