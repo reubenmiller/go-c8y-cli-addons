@@ -1,0 +1,19 @@
+{
+  "version": "1",
+  "definitions": [
+      {
+          "name": "remoteAccessConfiguration",
+          "priority": 350,
+          "fragments": ["credentials.type", "protocol"],
+          "columns": [
+              "id",
+              "name",
+              "protocol",
+              "hostname",
+              "port",
+              "credentials.type",
+              "credentials.username"
+          ]
+      }
+  ]
+}
