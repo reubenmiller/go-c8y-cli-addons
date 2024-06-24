@@ -8,6 +8,7 @@
             "columns": [
                 "id",
                 "name",
+                "softwareType",
                 "c8y_Filter",
                 "lastUpdated",
                 "description"
