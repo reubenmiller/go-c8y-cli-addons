@@ -95,7 +95,7 @@ Enable dev mode (enables POST, PUT and DELETE commands)
         [parameter(ValueFromRemainingArguments=$true)]
         $Options
     )
-    c8y settings update --shell auto mode $Mode $Options | source
+    c8y settings update --shell auto mode $Mode $Options | Out-String | Invoke-Expression
     Write-Host "Enabled "$Mode" mode (temporarily)" -ForegroundColor Green
 }
 
@@ -108,5 +108,3 @@ Function update-c8y () {
     git -C "$UserHome/.go-c8y-cli" pull --ff-only 2>&1 > $null
     & "$UserHome/.go-c8y-cli/install.ps1"
 }
-
-# Function source { $input | Out-String | Invoke-Expression }
